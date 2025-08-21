@@ -374,19 +374,28 @@ async function shareCard() {
     if (!currentRecord) return;
     
     try {
-        // Convert card to image
+        // Convert card to image with higher quality
         const cardElement = cardPreview.querySelector('.info-card');
-        const canvas = await html2canvas(cardElement);
-        const imageData = canvas.toDataURL('image/png');
+        const canvas = await html2canvas(cardElement, {
+            scale: 3, // Increase scale for higher resolution
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+        });
+        const imageData = canvas.toDataURL('image/png', 1.0); // Use maximum quality
+        
+        // Create a filename with date
+        const now = new Date();
+        const filename = `بطاقة_تومەتبار_${now.getTime()}.png`;
         
         // Check if Web Share API is available
         if (navigator.share) {
             // Create a blob from the image data
             const blob = await (await fetch(imageData)).blob();
-            const file = new File([blob], 'violation-card.png', { type: 'image/png' });
+            const file = new File([blob], filename, { type: 'image/png' });
             
             await navigator.share({
-                title: 'بطاقة المشتبه به',
+                title: 'توماركرنا تومەتبارا',
                 text: `بطاقة معلومات: ${currentRecord.name}`,
                 files: [file]
             });
@@ -394,7 +403,7 @@ async function shareCard() {
             // Fallback for browsers that don't support Web Share API
             const link = document.createElement('a');
             link.href = imageData;
-            link.download = 'violation-card.png';
+            link.download = filename;
             link.click();
             
             alert('تم حفظ البطاقة. يمكنك مشاركتها يدوياً.');
@@ -410,15 +419,24 @@ async function downloadCard() {
     if (!currentRecord) return;
     
     try {
-        // Convert card to image
+        // Convert card to image with higher quality
         const cardElement = cardPreview.querySelector('.info-card');
-        const canvas = await html2canvas(cardElement);
-        const imageData = canvas.toDataURL('image/png');
+        const canvas = await html2canvas(cardElement, {
+            scale: 3, // Increase scale for higher resolution
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+        });
+        const imageData = canvas.toDataURL('image/png', 1.0); // Use maximum quality
+        
+        // Create a filename with date
+        const now = new Date();
+        const filename = `بطاقة_تومەتبار_${now.getTime()}.png`;
         
         // Create download link
         const link = document.createElement('a');
         link.href = imageData;
-        link.download = `violation-card-${currentRecord.id}.png`;
+        link.download = filename;
         link.click();
     } catch (error) {
         console.error('Error downloading card:', error);
