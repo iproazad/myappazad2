@@ -53,16 +53,19 @@
 
         .photos-container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            flex-wrap: nowrap;
+            gap: 5px;
             margin-bottom: 20px;
-            justify-content: center;
+            justify-content: space-between;
+            overflow-x: auto;
+            padding: 5px 0;
         }
 
         .photo-item {
             position: relative;
-            width: 100px;
-            height: 100px;
+            width: 70px;
+            height: 70px;
+            flex: 0 0 auto;
         }
 
         .photo-preview {
@@ -107,8 +110,13 @@
         .photo-buttons {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 3px;
+            margin-top: 5px;
+        }
+        
+        .photo-buttons .btn {
+            padding: 3px 5px;
+            font-size: 12px;
         }
 
         .form-row {
@@ -232,6 +240,24 @@
         @media (max-width: 600px) {
             .form-row .form-group {
                 min-width: 100%;
+            }
+            
+            .photos-container {
+                padding: 5px;
+                justify-content: flex-start;
+            }
+            
+            .photo-item {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .photo-preview {
+                border-width: 1px;
+            }
+            
+            .placeholder-icon {
+                font-size: 30px;
             }
         }
     </style>
