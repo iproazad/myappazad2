@@ -77,8 +77,7 @@ function addEventListeners() {
         btn.addEventListener('click', () => {
             const index = btn.getAttribute('data-index');
             const photoInput = document.getElementById(`photo-input-${index}`);
-            // Use user-facing camera for better selfies
-            photoInput.setAttribute('capture', 'user');
+            photoInput.setAttribute('capture', 'environment');
             photoInput.click();
         });
     });
@@ -87,7 +86,6 @@ function addEventListeners() {
         btn.addEventListener('click', () => {
             const index = btn.getAttribute('data-index');
             const photoInput = document.getElementById(`photo-input-${index}`);
-            // Remove capture attribute to allow gallery selection
             photoInput.removeAttribute('capture');
             photoInput.click();
         });
