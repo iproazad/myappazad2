@@ -5,7 +5,7 @@ let personCount = 1;
 const MAX_PERSONS = 5;
 let personPhotos = {};
 let savedRecords = [];
-const STORAGE_KEY = 'tomaryAresheRecords';
+const STORAGE_KEY = 'problemRecords';
 
 function initApp() {
     // Initialize event listeners
@@ -13,8 +13,6 @@ function initApp() {
     document.getElementById('multi-person-form').addEventListener('submit', saveMultiPersonData);
     document.getElementById('share-whatsapp').addEventListener('click', shareViaWhatsapp);
     document.getElementById('new-entry').addEventListener('click', resetForm);
-    document.getElementById('show-records-button').addEventListener('click', showRecordsModal);
-    document.getElementById('close-records-modal').addEventListener('click', hideRecordsModal);
     
     // Initialize photo buttons for the first person
     initializePhotoButton(1);
@@ -222,6 +220,14 @@ function saveMultiPersonData(event) {
     
     // Save record to localStorage
     saveRecord(personsData, caseData, cardImage);
+    
+    // تحديث قائمة السجلات إذا كانت مرئية
+    if (document.getElementById('records-list').classList.contains('active')) {
+        // استدعاء وظيفة تحديث قائمة السجلات المعرفة في سكريبت التبويبات
+        if (typeof updateRecordsList === 'function') {
+            updateRecordsList();
+        }
+    }
     
     // Show success modal
     document.getElementById('success-modal').style.display = 'flex';
@@ -609,17 +615,26 @@ function saveRecord(personsData, caseData, cardImage) {
     // Create a record object
     const record = {
         id: Date.now().toString(), // Unique ID based on timestamp
-        date: new Date().toISOString(),
-        personsData: personsData,
-        caseData: caseData,
+        timestamp: new Date().toISOString(),
+        persons: personsData,
+        problemType: caseData.issueType,
+        location: caseData.location,
+        timeFrom: caseData.timeFrom,
+        timeTo: caseData.timeTo,
+        period: caseData.period,
+        point: caseData.point,
+        sentTo: caseData.sentTo,
         cardImage: cardImage // Store the original card image
     };
     
+    // Load existing records
+    const existingRecords = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    
     // Add to records array
-    savedRecords.unshift(record); // Add to beginning of array (newest first)
+    existingRecords.unshift(record); // Add to beginning of array (newest first)
     
     // Save to localStorage
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRecords));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(existingRecords));
 }
 
 function loadSavedRecords() {
@@ -632,23 +647,7 @@ function loadSavedRecords() {
     }
 }
 
-function showRecordsModal() {
-    // Show the records modal
-    const modal = document.getElementById('records-modal');
-    modal.style.display = 'flex';
-    
-    // Render the records list
-    renderRecordsList();
-}
-
-function hideRecordsModal() {
-    // Hide the records modal
-    document.getElementById('records-modal').style.display = 'none';
-}
-
-function renderRecordsList() {
-    const recordsList = document.getElementById('records-list');
-    const noRecordsMessage = document.getElementById('no-records-message');
+// تم استبدال وظائف النافذة المنبثقة بنظام التبويبات
     
     // Clear the current list
     recordsList.innerHTML = '';

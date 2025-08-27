@@ -45,6 +45,95 @@
             border: 2px solid white;
         }
         
+        /* Tab Styles */
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background-color: #f1f1f1;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .tab-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Records List Styles */
+        .records-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            padding: 10px;
+        }
+        
+        .record-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        
+        .record-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .record-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        
+        .record-actions button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            margin-left: 10px;
+            cursor: pointer;
+            color: #555;
+        }
+        
+        .view-record-btn:hover {
+            color: #3498db;
+        }
+        
+        .delete-record-btn:hover {
+            color: #e74c3c;
+        }
+        
+        .no-records {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 30px;
+            color: #777;
+            font-size: 16px;
+        }
+        
         /* Records List Modal Styles */
         .records-modal-content {
             max-width: 800px;
@@ -330,9 +419,6 @@
         <header>
             <h1>توماری ئاریشە</h1>
             <h2>Problem Registration</h2>
-            <button id="show-records-button" class="primary-button">
-                <i class="fas fa-list"></i> قائمة السجلات
-            </button>
         </header>
 
         <!-- Navigation Buttons -->
@@ -348,7 +434,14 @@
             </a>
         </div>
 
-        <main>
+        <main class="app-content">
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="new-record">سجل جديد</button>
+                    <button class="tab-btn" data-tab="records-list">قائمة السجلات</button>
+                </div>
+                
+                <div id="new-record" class="tab-content active">
             <form id="multi-person-form">
                 <div class="multi-person-section" id="persons-container">
                     <!-- Person 1 -->
@@ -544,6 +637,15 @@
                     <i class="fas fa-save"></i> خەزنكرنا كارتێ
                 </button>
             </form>
+        </div>
+        
+        <div id="records-list" class="tab-content">
+            <div id="records-container" class="records-grid">
+                <!-- سيتم إضافة السجلات هنا ديناميكيًا -->
+                <div class="no-records">لا توجد سجلات حتى الآن</div>
+            </div>
+        </div>
+    </div>
         </main>
         
         <div id="success-modal" class="modal">
@@ -561,28 +663,125 @@
         </div>
     </div>
 
-    <!-- Records List Modal -->
-    <div id="records-modal" class="modal">
-        <div class="modal-content records-modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-list"></i> قائمة السجلات</h3>
-                <button id="close-records-modal" class="close-button">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="records-list-container">
-                <div id="records-list" class="records-list">
-                    <!-- Records will be added here dynamically -->
-                </div>
-                <div id="no-records-message" class="no-records-message">
-                    <i class="fas fa-info-circle"></i>
-                    <p>لا توجد سجلات محفوظة حتى الآن</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- تم استبدال النافذة المنبثقة بنظام التبويبات -->
 
     <script src="multi-person.js"></script>
+    
+    <!-- Tab Switching Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching functionality
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.getAttribute('data-tab');
+                    
+                    // Hide all tab contents and deactivate all buttons
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Show the selected tab content and activate the button
+                    document.getElementById(targetId).classList.add('active');
+                    button.classList.add('active');
+                    
+                    // تحديث قائمة السجلات عند الانتقال إلى تبويب السجلات
+                    if (targetId === 'records-list') {
+                        updateRecordsList();
+                    }
+                });
+            });
+            
+            // تحديث قائمة السجلات
+            function updateRecordsList() {
+                const recordsContainer = document.getElementById('records-container');
+                const noRecordsMessage = recordsContainer.querySelector('.no-records');
+                
+                // الحصول على السجلات المخزنة
+                const savedRecords = JSON.parse(localStorage.getItem('problemRecords') || '[]');
+                
+                // إزالة جميع السجلات الحالية
+                const existingRecords = recordsContainer.querySelectorAll('.record-card');
+                existingRecords.forEach(record => record.remove());
+                
+                // إظهار رسالة عدم وجود سجلات إذا لم تكن هناك سجلات
+                if (savedRecords.length === 0) {
+                    noRecordsMessage.style.display = 'block';
+                    return;
+                }
+                
+                // إخفاء رسالة عدم وجود سجلات
+                noRecordsMessage.style.display = 'none';
+                
+                // إضافة السجلات إلى القائمة
+                savedRecords.forEach((record, index) => {
+                    const recordCard = document.createElement('div');
+                    recordCard.className = 'record-card';
+                    recordCard.dataset.recordId = index;
+                    
+                    // تحديد معلومات السجل للعرض
+                    const firstPerson = record.persons[0] || {};
+                    const recordDate = new Date(record.timestamp).toLocaleDateString('ar-IQ');
+                    
+                    recordCard.innerHTML = `
+                        <h3>${firstPerson.fullname || 'بدون اسم'}</h3>
+                        <p><i class="fas fa-calendar"></i> ${recordDate}</p>
+                        <p><i class="fas fa-map-marker-alt"></i> ${firstPerson.address || 'بدون عنوان'}</p>
+                        <p><i class="fas fa-exclamation-circle"></i> ${record.problemType || 'بدون نوع مشكلة'}</p>
+                        <div class="record-actions">
+                            <button class="view-record-btn" data-record-id="${index}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="delete-record-btn" data-record-id="${index}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    recordsContainer.appendChild(recordCard);
+                });
+                
+                // إضافة مستمعي الأحداث لأزرار العرض والحذف
+                document.querySelectorAll('.view-record-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const recordId = btn.dataset.recordId;
+                        viewRecord(recordId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-record-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const recordId = btn.dataset.recordId;
+                        deleteRecord(recordId);
+                    });
+                });
+            }
+            
+            // عرض سجل
+            function viewRecord(recordId) {
+                const savedRecords = JSON.parse(localStorage.getItem('problemRecords') || '[]');
+                const record = savedRecords[recordId];
+                
+                if (record) {
+                    // هنا يمكن تنفيذ منطق عرض السجل بالتفصيل
+                    alert('عرض السجل: ' + record.persons[0]?.fullname);
+                }
+            }
+            
+            // حذف سجل
+            function deleteRecord(recordId) {
+                if (confirm('هل أنت متأكد من حذف هذا السجل؟')) {
+                    const savedRecords = JSON.parse(localStorage.getItem('problemRecords') || '[]');
+                    savedRecords.splice(recordId, 1);
+                    localStorage.setItem('problemRecords', JSON.stringify(savedRecords));
+                    updateRecordsList();
+                }
+            }
+        });
+    </script>
     
     <!-- Register Service Worker for PWA -->
     <script>
