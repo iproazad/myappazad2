@@ -72,7 +72,7 @@ function initApp() {
         newRecordTab.click();
     }
     
-    // إضافة وظيفة updateRecordsList لتوافق التصميم الجديد
+    // إضافة وظيفة updateRecordsList لتوافق التصميج الجديد
     window.updateRecordsList = function() {
         renderRecordsList();
     };
@@ -969,6 +969,11 @@ function renderRecordsList() {
         noRecordsMessage.style.display = 'none';
     }
     
+    // إنشاء حاوية للبطاقات
+    const recordsGrid = document.createElement('div');
+    recordsGrid.className = 'records-grid';
+    recordsList.appendChild(recordsGrid);
+    
     // Add each record to the list
     savedRecords.forEach(record => {
         const recordCard = document.createElement('div');
@@ -999,24 +1004,32 @@ function renderRecordsList() {
         const photoSrc = firstPerson.photo || '';
         
         recordCard.innerHTML = `
-            <div class="card-photo">
-                ${photoSrc ? `<img src="${photoSrc}" alt="صورة الشخص">` : '<i class="fas fa-user"></i>'}
-            </div>
-            <div class="card-info">
-                <div class="card-name">${firstPerson.name || 'بدون اسم'}</div>
-                <div class="card-type">${record.caseData.issueType || 'غير محدد'}</div>
-                <div class="card-date">${formattedDate}</div>
-                <p><strong>الأشخاص:</strong> ${record.personsData.length}</p>
-                <p><strong>المكان:</strong> ${record.caseData.location || '-'}</p>
-                <p><strong>الوقت:</strong> ${timeDisplay}</p>
-            </div>
-            <div class="record-actions">
-                <button class="action-button view-button" title="عرض">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="action-button delete-button" title="حذف">
-                    <i class="fas fa-trash"></i>
-                </button>
+            <div class="record-card-inner">
+                <div class="card-header">
+                    <div class="card-photo">
+                        ${photoSrc ? `<img src="${photoSrc}" alt="صورة الشخص">` : '<i class="fas fa-user"></i>'}
+                    </div>
+                    <div class="card-title">
+                        <div class="card-name">${firstPerson.name || 'بدون اسم'}</div>
+                        <div class="card-type">${record.caseData.issueType || 'غير محدد'}</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="card-info-box">
+                        <div class="card-date"><i class="fas fa-calendar-alt"></i> ${formattedDate}</div>
+                        <div class="card-detail"><i class="fas fa-users"></i> <strong>الأشخاص:</strong> ${record.personsData.length}</div>
+                        <div class="card-detail"><i class="fas fa-map-marker-alt"></i> <strong>المكان:</strong> ${record.caseData.location || '-'}</div>
+                        <div class="card-detail"><i class="fas fa-clock"></i> <strong>الوقت:</strong> ${timeDisplay}</div>
+                    </div>
+                </div>
+                <div class="record-actions">
+                    <button class="action-button view-button" title="عرض">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-button delete-button" title="حذف">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             </div>
         `;
         
@@ -1039,7 +1052,7 @@ function renderRecordsList() {
             viewRecord(record.id);
         });
         
-        recordsList.appendChild(recordCard);
+        recordsGrid.appendChild(recordCard);
     });
     
     // تحديث عنوان القسم بعدد السجلات
@@ -1070,38 +1083,87 @@ function viewRecord(recordId) {
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="record-details">
-                <div class="case-details">
-                    <h3>معلومات القضية</h3>
-                    <p><strong>نوع القضية:</strong> ${record.caseData.issueType || 'غير محدد'}</p>
-                    <p><strong>الوقت:</strong> ${record.caseData.timeFrom ? `${formatTime12Hour(record.caseData.timeFrom)} - ${formatTime12Hour(record.caseData.timeTo)}` : 'غير محدد'}</p>
-                    <p><strong>الموقع:</strong> ${record.caseData.location || 'غير محدد'}</p>
-                    <p><strong>اسم السائق:</strong> ${record.caseData.driverName || 'غير محدد'}</p>
-                    <p><strong>النقطة:</strong> ${record.caseData.point || 'غير محدد'}</p>
-                    <p><strong>الإرسال إلى:</strong> ${record.caseData.sentTo || 'غير محدد'}</p>
-                </div>
-                
-                <h3>معلومات الأشخاص</h3>
-                ${record.personsData.map((person, idx) => `
-                    <div class="person-details">
-                        <h4>الشخص ${idx + 1}</h4>
-                        ${person.photo ? `<img src="${person.photo}" alt="صورة الشخص" class="person-photo">` : ''}
-                        <p><strong>النوع:</strong> ${person.type || 'غير محدد'}</p>
-                        <p><strong>الاسم الكامل:</strong> ${person.name || 'غير محدد'}</p>
-                        <p><strong>تاريخ الميلاد:</strong> ${person.birthdate || 'غير محدد'}</p>
-                        <p><strong>العنوان:</strong> ${person.address || 'غير محدد'}</p>
-                        <p><strong>رقم الهاتف:</strong> ${person.phone || 'غير محدد'}</p>
-                    </div>
-                `).join('')}
-            </div>
             <div class="view-record-container">
                 <img src="${record.cardImage}" alt="بطاقة السجل" class="record-image">
             </div>
+            <div class="record-details">
+                <div class="case-details">
+                    <h3><i class="fas fa-folder"></i> معلومات القضية</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <i class="fas fa-tag"></i>
+                            <span class="detail-label">نوع القضية:</span>
+                            <span class="detail-value">${record.caseData.issueType || 'غير محدد'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-clock"></i>
+                            <span class="detail-label">الوقت:</span>
+                            <span class="detail-value">${record.caseData.timeFrom ? `${formatTime12Hour(record.caseData.timeFrom)} - ${formatTime12Hour(record.caseData.timeTo)}` : 'غير محدد'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span class="detail-label">الموقع:</span>
+                            <span class="detail-value">${record.caseData.location || 'غير محدد'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-user"></i>
+                            <span class="detail-label">اسم السائق:</span>
+                            <span class="detail-value">${record.caseData.driverName || 'غير محدد'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-map-pin"></i>
+                            <span class="detail-label">النقطة:</span>
+                            <span class="detail-value">${record.caseData.point || 'غير محدد'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-paper-plane"></i>
+                            <span class="detail-label">الإرسال إلى:</span>
+                            <span class="detail-value">${record.caseData.sentTo || 'غير محدد'}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3><i class="fas fa-users"></i> معلومات الأشخاص</h3>
+                <div class="persons-container">
+                ${record.personsData.map((person, idx) => `
+                    <div class="person-details">
+                        <div class="person-header">
+                            <div class="person-photo-container">
+                                ${person.photo ? `<img src="${person.photo}" alt="صورة الشخص" class="person-photo">` : '<div class="person-photo-placeholder"><i class="fas fa-user"></i></div>'}
+                            </div>
+                            <h4>الشخص ${idx + 1} - ${person.name || 'بدون اسم'}</h4>
+                        </div>
+                        <div class="person-info">
+                            <div class="detail-item">
+                                <i class="fas fa-id-card"></i>
+                                <span class="detail-label">النوع:</span>
+                                <span class="detail-value">${person.type || 'غير محدد'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-birthday-cake"></i>
+                                <span class="detail-label">تاريخ الميلاد:</span>
+                                <span class="detail-value">${person.birthdate || 'غير محدد'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-home"></i>
+                                <span class="detail-label">العنوان:</span>
+                                <span class="detail-value">${person.address || 'غير محدد'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-phone"></i>
+                                <span class="detail-label">رقم الهاتف:</span>
+                                <span class="detail-value">${person.phone || 'غير محدد'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+                </div>
+            </div>
             <div class="modal-footer">
-                <button id="download-record-image" class="action-button">
+                <button id="download-record-image" class="action-button save-button">
                     <i class="fas fa-download"></i> تنزيل الصورة
                 </button>
-                <button id="share-record-whatsapp" class="action-button">
+                <button id="share-record-whatsapp" class="action-button whatsapp-button">
                     <i class="fab fa-whatsapp"></i> مشاركة عبر واتساب
                 </button>
                 <button id="close-view-record-button" class="action-button secondary">
