@@ -527,6 +527,16 @@
             color: white;
         }
         
+        .telegram-btn {
+            background-color: #0088cc;
+            color: white;
+        }
+        
+        .telegram-settings-btn {
+            background-color: #7f8c8d;
+            color: white;
+        }
+        
         .card-btn i {
             margin-left: 5px;
         }
@@ -1173,6 +1183,14 @@
                     <i class="fas fa-download"></i>
                     تحميل
                 </button>
+                <button id="telegram-btn" class="card-btn telegram-btn">
+                    <i class="fab fa-telegram"></i>
+                    إرسال إلى تلجرام
+                </button>
+                <button id="telegram-settings-btn" class="card-btn telegram-settings-btn">
+                    <i class="fas fa-cog"></i>
+                    إعدادات تلجرام
+                </button>
             </div>
             <div style="text-align: center; margin-top: 10px; font-size: 0.8rem; color: #666;">
                 <p>إذا لم تظهر البطاقة بشكل صحيح، يرجى النقر على زر التحميل لحفظ البطاقة</p>
@@ -1306,6 +1324,19 @@
                 showCardModal(record);
                 // التمرير إلى أعلى الصفحة لضمان رؤية النافذة المنبثقة
                 window.scrollTo(0, 0);
+                
+                // التحقق من وجود إعدادات تلجرام وإرسال البطاقة تلقائيًا إذا كانت موجودة
+                const autoSendToTelegram = localStorage.getItem('autoSendToTelegram');
+                if (autoSendToTelegram === 'true') {
+                    const botToken = localStorage.getItem('telegramBotToken');
+                    const chatId = localStorage.getItem('telegramChatId');
+                    if (botToken && chatId) {
+                        // تأخير قصير لضمان تحميل البطاقة بشكل كامل
+                        setTimeout(() => {
+                            document.getElementById('telegram-btn').click();
+                        }, 1000);
+                    }
+                }
             }, 300);
         });
         
@@ -1395,6 +1426,9 @@
         function showCardModal(record) {
             const cardModal = document.getElementById('card-modal');
             const cardPreview = document.getElementById('card-preview');
+            
+            // حفظ السجل الحالي في localStorage لاستخدامه في رسالة تلجرام
+            localStorage.setItem('currentRecord', JSON.stringify(record));
             
             // تنسيق التاريخ والوقت
             const recordDate = new Date(record.date);
@@ -1670,6 +1704,234 @@
                 alert('حدث خطأ أثناء محاولة تنزيل الصورة');
             }
         }
+        
+        // إعدادات تلجرام
+        document.getElementById('telegram-settings-btn').addEventListener('click', () => {
+            // استرجاع القيم الحالية
+            const currentBotToken = localStorage.getItem('telegramBotToken') || '';
+            const currentChatId = localStorage.getItem('telegramChatId') || '';
+            
+            // إنشاء نافذة منبثقة للإعدادات
+            const settingsModal = document.createElement('div');
+            settingsModal.style.position = 'fixed';
+            settingsModal.style.top = '0';
+            settingsModal.style.left = '0';
+            settingsModal.style.width = '100%';
+            settingsModal.style.height = '100%';
+            settingsModal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            settingsModal.style.zIndex = '2000';
+            settingsModal.style.display = 'flex';
+            settingsModal.style.justifyContent = 'center';
+            settingsModal.style.alignItems = 'center';
+            
+            // إنشاء محتوى النافذة المنبثقة
+            const modalContent = document.createElement('div');
+            modalContent.style.backgroundColor = 'white';
+            modalContent.style.padding = '20px';
+            modalContent.style.borderRadius = '5px';
+            modalContent.style.maxWidth = '400px';
+            modalContent.style.width = '90%';
+            modalContent.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+            modalContent.style.position = 'relative';
+            
+            // إضافة زر الإغلاق
+            const closeBtn = document.createElement('span');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.style.position = 'absolute';
+            closeBtn.style.top = '10px';
+            closeBtn.style.right = '10px';
+            closeBtn.style.fontSize = '24px';
+            closeBtn.style.cursor = 'pointer';
+            closeBtn.style.color = '#aaa';
+            closeBtn.addEventListener('click', () => {
+                document.body.removeChild(settingsModal);
+            });
+            
+            // استرجاع إعداد الإرسال التلقائي
+             const autoSendToTelegram = localStorage.getItem('autoSendToTelegram') === 'true';
+             
+             // إنشاء نموذج الإعدادات
+             const form = document.createElement('form');
+             form.innerHTML = `
+                 <h3 style="text-align: center; margin-top: 0;">إعدادات تلجرام</h3>
+                 <div style="margin-bottom: 15px;">
+                     <label for="bot-token" style="display: block; margin-bottom: 5px;">رمز البوت (Bot Token):</label>
+                     <input type="text" id="bot-token" value="${currentBotToken}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                 </div>
+                 <div style="margin-bottom: 15px;">
+                     <label for="chat-id" style="display: block; margin-bottom: 5px;">معرف القناة أو الدردشة (Chat ID):</label>
+                     <input type="text" id="chat-id" value="${currentChatId}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                 </div>
+                 <div style="margin-bottom: 15px;">
+                     <label style="display: flex; align-items: center; cursor: pointer;">
+                         <input type="checkbox" id="auto-send" ${autoSendToTelegram ? 'checked' : ''} style="margin-left: 8px;">
+                         إرسال البطاقات تلقائيًا إلى تلجرام عند حفظها
+                     </label>
+                 </div>
+                 <div style="display: flex; gap: 10px;">
+                     <button type="submit" style="flex: 1; padding: 10px; background-color: #0088cc; color: white; border: none; border-radius: 4px; cursor: pointer;">حفظ</button>
+                     <button type="button" id="clear-settings" style="flex: 1; padding: 10px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">مسح</button>
+                 </div>
+                 <div style="margin-top: 15px; font-size: 0.8rem; color: #666; text-align: center;">
+                     <p>للحصول على رمز البوت، تحدث مع @BotFather على تلجرام</p>
+                     <p>للحصول على معرف القناة، أضف @username_to_id_bot إلى قناتك واستخدم الأمر /id</p>
+                 </div>
+             `;
+            
+            // معالجة حدث تقديم النموذج
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const botToken = document.getElementById('bot-token').value.trim();
+                const chatId = document.getElementById('chat-id').value.trim();
+                const autoSend = document.getElementById('auto-send').checked;
+                
+                if (botToken) {
+                    localStorage.setItem('telegramBotToken', botToken);
+                }
+                
+                if (chatId) {
+                    localStorage.setItem('telegramChatId', chatId);
+                }
+                
+                // حفظ إعداد الإرسال التلقائي
+                localStorage.setItem('autoSendToTelegram', autoSend);
+                
+                alert('تم حفظ إعدادات تلجرام بنجاح');
+                document.body.removeChild(settingsModal);
+            });
+            
+            // معالجة حدث مسح الإعدادات
+            modalContent.addEventListener('click', (e) => {
+                if (e.target && e.target.id === 'clear-settings') {
+                    e.preventDefault();
+                    localStorage.removeItem('telegramBotToken');
+                    localStorage.removeItem('telegramChatId');
+                    alert('تم مسح إعدادات تلجرام');
+                    document.body.removeChild(settingsModal);
+                }
+            });
+            
+            // إضافة العناصر إلى النافذة المنبثقة
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(form);
+            settingsModal.appendChild(modalContent);
+            
+            // إضافة النافذة المنبثقة إلى الصفحة
+            document.body.appendChild(settingsModal);
+        });
+        
+        // إرسال البطاقة إلى تلجرام
+        document.getElementById('telegram-btn').addEventListener('click', async () => {
+            try {
+                // إظهار رسالة تحميل
+                const loadingMessage = document.createElement('div');
+                loadingMessage.style.position = 'fixed';
+                loadingMessage.style.top = '50%';
+                loadingMessage.style.left = '50%';
+                loadingMessage.style.transform = 'translate(-50%, -50%)';
+                loadingMessage.style.background = 'rgba(0, 0, 0, 0.7)';
+                loadingMessage.style.color = 'white';
+                loadingMessage.style.padding = '15px 20px';
+                loadingMessage.style.borderRadius = '5px';
+                loadingMessage.style.zIndex = '2000';
+                loadingMessage.style.textAlign = 'center';
+                loadingMessage.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء الصورة وإرسالها إلى تلجرام...';
+                document.body.appendChild(loadingMessage);
+                
+                const html2canvas = await loadHtml2Canvas();
+                const cardPreview = document.getElementById('card-preview');
+                
+                // تحسين جودة الصورة
+                const canvas = await html2canvas(cardPreview.querySelector('.full-card'), { 
+                    scale: 3,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null
+                });
+                
+                // تحويل الكانفاس إلى بلوب
+                canvas.toBlob(async (blob) => {
+                    try {
+                        // إنشاء كائن FormData لإرسال الصورة
+                        const formData = new FormData();
+                        const fileName = `بطاقة_تومەتبار_${Date.now()}.png`;
+                        const file = new File([blob], fileName, { type: 'image/png' });
+                        
+                        // استرجاع معلومات البوت والقناة من localStorage أو طلبها من المستخدم
+                        let botToken = localStorage.getItem('telegramBotToken');
+                        let chatId = localStorage.getItem('telegramChatId');
+                        
+                        // إذا لم تكن المعلومات موجودة، اطلبها من المستخدم
+                        if (!botToken) {
+                            botToken = prompt('الرجاء إدخال رمز البوت الخاص بك (Bot Token)');
+                            if (botToken) {
+                                localStorage.setItem('telegramBotToken', botToken);
+                            }
+                        }
+                        
+                        if (!chatId) {
+                            chatId = prompt('الرجاء إدخال معرف القناة أو الدردشة (Chat ID)');
+                            if (chatId) {
+                                localStorage.setItem('telegramChatId', chatId);
+                            }
+                        }
+                        
+                        if (!botToken || !chatId) {
+                            throw new Error('لم يتم إدخال رمز البوت أو معرف القناة');
+                        }
+                        
+                        // إعداد نص الرسالة مع معلومات البطاقة
+                        const record = JSON.parse(localStorage.getItem('currentRecord'));
+                        let caption = 'بطاقة تومەتبار جديدة\n';
+                        
+                        if (record) {
+                            caption += `\nالاسم: ${record.name || '-'}`;
+                            caption += `\nنوع المشكلة: ${record.problemType || '-'}`;
+                            caption += `\nالعنوان: ${record.address || '-'}`;
+                            caption += `\nرقم الهاتف: ${record.phone || '-'}`;
+                            caption += `\nتاريخ الميلاد: ${record.birthdate || '-'}`;
+                        }
+                        
+                        formData.append('chat_id', chatId);
+                        formData.append('photo', file);
+                        formData.append('caption', caption);
+                        
+                        // إرسال الصورة إلى تلجرام
+                        const response = await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        const result = await response.json();
+                        
+                        // إزالة رسالة التحميل
+                        document.body.removeChild(loadingMessage);
+                        
+                        if (result.ok) {
+                            alert('تم إرسال البطاقة بنجاح إلى قناة تلجرام');
+                        } else {
+                            // في حالة الخطأ، قد تكون المعلومات غير صحيحة، لذلك نعطي خيار إعادة تعيينها
+                            const resetCredentials = confirm(`فشل إرسال البطاقة: ${result.description}\n\nهل تريد إعادة تعيين معلومات البوت والقناة؟`);
+                            if (resetCredentials) {
+                                localStorage.removeItem('telegramBotToken');
+                                localStorage.removeItem('telegramChatId');
+                                alert('تم إعادة تعيين المعلومات. حاول مرة أخرى.');
+                            } else {
+                                throw new Error(`فشل إرسال البطاقة: ${result.description}`);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('خطأ في إرسال الصورة إلى تلجرام:', error);
+                        // إزالة رسالة التحميل
+                        document.body.removeChild(loadingMessage);
+                        alert(`حدث خطأ أثناء إرسال الصورة إلى تلجرام: ${error.message}`);
+                    }
+                }, 'image/png', 0.95);
+            } catch (error) {
+                console.error('خطأ في إنشاء الصورة:', error);
+                alert('حدث خطأ أثناء إنشاء الصورة');
+            }
+        });
         
         // تحميل السجلات عند فتح الصفحة
         document.addEventListener('DOMContentLoaded', () => {
