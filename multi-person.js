@@ -899,9 +899,13 @@ function filterRecords(searchTerm) {
                 <div class="card-name">${firstPerson.name || 'بدون اسم'}</div>
                 <div class="card-type">${record.caseData.issueType || 'غير محدد'}</div>
                 <div class="card-date">${formattedDate}</div>
-                <p><strong>الأشخاص:</strong> ${record.personsData.length}</p>
-                <p><strong>المكان:</strong> ${record.caseData.location || '-'}</p>
-                <p><strong>الوقت:</strong> ${timeDisplay}</p>
+                <div class="info-row">
+                    <p><strong>الأشخاص:</strong> ${record.personsData.length}</p>
+                    <p><strong>المكان:</strong> ${record.caseData.location || '-'}</p>
+                </div>
+                <div class="info-row">
+                    <p><strong>الوقت:</strong> ${timeDisplay}</p>
+                </div>
             </div>
             <div class="record-actions">
                 <button class="action-button view-button" title="عرض">
