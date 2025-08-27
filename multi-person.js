@@ -270,7 +270,8 @@ function saveMultiPersonData(event) {
         location: document.getElementById('problem-location').value,
         driverName: document.getElementById('driver-name').value,
         point: document.getElementById('point').value,
-        sentTo: document.getElementById('sent-to').value
+        sentTo: document.getElementById('sent-to').value,
+        notes: document.getElementById('notes').value
     };
     
     // Generate and save the multi-person card
@@ -289,11 +290,12 @@ function generateMultiPersonCard(personsData, caseData) {
     canvas.id = 'multiPersonCanvas';
     const ctx = canvas.getContext('2d');
     
-    // Set canvas dimensions based on number of persons
-    const personHeight = 320; // Increased height per person
-    const headerHeight = 220; // Increased height for case information
-    const canvasWidth = 1000;
-    const canvasHeight = headerHeight + (personsData.length * personHeight) + 50; // Added footer space
+    // Set canvas dimensions based on number of persons with higher resolution
+    const personHeight = 640; // Doubled height per person for higher resolution
+    const headerHeight = 440; // Doubled height for case information
+    const notesHeight = caseData.notes ? 200 : 0; // Doubled height for notes section if notes exist
+    const canvasWidth = 2000; // Doubled width for higher resolution
+    const canvasHeight = headerHeight + (personsData.length * personHeight) + notesHeight + 100; // Added footer space
     
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
@@ -339,20 +341,26 @@ function generateMultiPersonCard(personsData, caseData) {
         }
     });
     
+    // Draw notes section if notes exist
+    if (caseData.notes) {
+        const notesY = headerHeight + (personsData.length * personHeight) + 10;
+        drawNotesSection(ctx, caseData.notes, canvasWidth, notesY, notesHeight - 10);
+    }
+    
     // Add footer
-    const footerY = headerHeight + (personsData.length * personHeight) + 10;
+    const footerY = headerHeight + (personsData.length * personHeight) + notesHeight + 10;
     ctx.fillStyle = '#2980b9';
-    ctx.fillRect(0, footerY, canvasWidth, 40);
+    ctx.fillRect(0, footerY, canvasWidth, 80);
     
     // Add footer text
-    ctx.font = 'bold 16px Arial';
+    ctx.font = 'bold 32px Arial';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     const timestamp = new Date().toLocaleString('ar-IQ');
-    ctx.fillText(`تم إنشاء هذه البطاقة في: ${timestamp}`, canvasWidth / 2, footerY + 25);
+    ctx.fillText(`تم إنشاء هذه البطاقة في: ${timestamp}`, canvasWidth / 2, footerY + 50);
     
-    // Convert canvas to image and save
-    const cardImage = canvas.toDataURL('image/png');
+    // Convert canvas to image and save with high quality
+    const cardImage = canvas.toDataURL('image/png', 1.0);
     saveImageToDevice(cardImage);
     
     // Return the card image for saving in records
@@ -370,48 +378,48 @@ function drawCaseHeader(ctx, caseData, width, height) {
     
     // Add subtle pattern to header
     ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-    for (let i = 0; i < width; i += 20) {
-        for (let j = 0; j < height; j += 20) {
-            ctx.fillRect(i, j, 10, 10);
+    for (let i = 0; i < width; i += 40) {
+        for (let j = 0; j < height; j += 40) {
+            ctx.fillRect(i, j, 20, 20);
         }
     }
     
     // Add elegant decorative border
     ctx.strokeStyle = '#f39c12';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(10, 10, width - 20, height - 20);
+    ctx.lineWidth = 8;
+    ctx.strokeRect(20, 20, width - 40, height - 40);
     
     // Add inner border for more elegance
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(15, 15, width - 30, height - 30);
+    ctx.lineWidth = 4;
+    ctx.strokeRect(30, 30, width - 60, height - 60);
     
     // Add title with shadow
     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-    ctx.shadowBlur = 5;
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
-    ctx.font = 'bold 38px Arial';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 4;
+    ctx.shadowOffsetY = 4;
+    ctx.font = 'bold 76px Arial';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
-    ctx.fillText('توماری ئاریشە', width / 2, 50);
+    ctx.fillText('توماری ئاریشە', width / 2, 100);
     ctx.shadowColor = 'transparent';
     
     // Add gold accent line under title
     ctx.strokeStyle = '#f39c12';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.moveTo(width / 2 - 100, 60);
-    ctx.lineTo(width / 2 + 100, 60);
+    ctx.moveTo(width / 2 - 200, 120);
+    ctx.lineTo(width / 2 + 200, 120);
     ctx.stroke();
     
     // Add case information with improved styling
-    ctx.font = 'bold 22px Arial';
+    ctx.font = 'bold 44px Arial';
     ctx.textAlign = 'right';
     ctx.fillStyle = '#ffffff';
     
     // First row (right side) with improved spacing and alignment
-    ctx.fillText(`جورێ ئاریشێ: ${caseData.issueType || '-'}`, width - 40, 95);
+    ctx.fillText(`جورێ ئاریشێ: ${caseData.issueType || '-'}`, width - 80, 190);
     
     // Handle both old and new time format
     let timeDisplay = '';
@@ -425,33 +433,77 @@ function drawCaseHeader(ctx, caseData, width, height) {
         timeDisplay = '-';
     }
     
-    ctx.fillText(`دەمژمێر: ${timeDisplay}`, width - 40, 125);
-    ctx.fillText(`جهێ ئاریشێ: ${caseData.location || '-'}`, width - 40, 155);
+    ctx.fillText(`دەمژمێر: ${timeDisplay}`, width - 80, 250);
+    ctx.fillText(`جهێ ئاریشێ: ${caseData.location || '-'}`, width - 80, 310);
     
     // Second row (left side) with improved spacing and alignment
     ctx.textAlign = 'left';
-    ctx.fillText(`ناڤێ شوفێری: ${caseData.driverName || '-'}`, 40, 95);
-    ctx.fillText(`خالا: ${caseData.point || '-'}`, 40, 125);
-    ctx.fillText(`رەوانەكرن بـــو: ${caseData.sentTo || '-'}`, 40, 155);
+    ctx.fillText(`ناڤێ شوفێری: ${caseData.driverName || '-'}`, 80, 190);
+    ctx.fillText(`خالا: ${caseData.point || '-'}`, 80, 250);
+    ctx.fillText(`رەوانەكرن بـــو: ${caseData.sentTo || '-'}`, 80, 310);
     
     // Add current date with improved styling
     const currentDate = new Date().toLocaleDateString('ar-IQ');
     ctx.textAlign = 'center';
-    ctx.font = 'bold 18px Arial';
+    ctx.font = 'bold 36px Arial';
     
     // Add date background
-    const dateWidth = 200;
-    const dateHeight = 30;
+    const dateWidth = 400;
+    const dateHeight = 60;
     const dateX = (width / 2) - (dateWidth / 2);
-    const dateY = 170;
+    const dateY = 340;
     
     ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
     ctx.beginPath();
-    ctx.roundRect(dateX, dateY, dateWidth, dateHeight, 15);
+    ctx.roundRect(dateX, dateY, dateWidth, dateHeight, 30);
     ctx.fill();
     
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(`تاریخ: ${currentDate}`, width / 2, dateY + 20);
+    ctx.fillText(`تاریخ: ${currentDate}`, width / 2, dateY + 40);
+}
+
+function drawNotesSection(ctx, notes, width, yOffset, height) {
+    // Draw notes container background with similar style to person container
+    ctx.fillStyle = '#ecf0f1';
+    ctx.fillRect(0, yOffset, width, height);
+    
+    // Add border similar to person container
+    ctx.strokeStyle = '#3498db';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(20, yOffset + 20, width - 40, height - 40);
+    
+    // Add notes title with similar styling to person info
+    ctx.font = 'bold 44px Arial';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#2c3e50';
+    ctx.fillText('تێبینی:', width - 80, yOffset + 70);
+    
+    // Add notes content with word wrapping
+    ctx.font = 'bold 36px Arial';
+    ctx.fillStyle = '#2c3e50';
+    
+    const maxWidth = width - 160;
+    const lineHeight = 50;
+    let y = yOffset + 140; // Increased vertical spacing from title
+    
+    // Word wrap function for notes text
+    const words = notes.split(' ');
+    let line = '';
+    
+    for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+        
+        if (testWidth > maxWidth && n > 0) {
+            ctx.fillText(line, width - 80, y);
+            line = words[n] + ' ';
+            y += lineHeight;
+        } else {
+            line = testLine;
+        }
+    }
+    ctx.fillText(line, width - 80, y);
 }
 
 function drawPersonInfo(ctx, person, yOffset, width, height) {
@@ -462,25 +514,25 @@ function drawPersonInfo(ctx, person, yOffset, width, height) {
     
     // Add border
     ctx.strokeStyle = '#3498db';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, yOffset + 10, width - 20, height - 20);
+    ctx.lineWidth = 4;
+    ctx.strokeRect(20, yOffset + 20, width - 40, height - 40);
     
     // Draw person number badge
-    const badgeSize = 40;
+    const badgeSize = 80;
     ctx.fillStyle = '#3498db';
     ctx.beginPath();
-    ctx.arc(width - 30, yOffset + 30, badgeSize / 2, 0, Math.PI * 2);
+    ctx.arc(width - 60, yOffset + 60, badgeSize / 2, 0, Math.PI * 2);
     ctx.fill();
     
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 24px Arial';
+    ctx.font = 'bold 48px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(person.id, width - 30, yOffset + 38);
+    ctx.fillText(person.id, width - 60, yOffset + 76);
     
     // Draw photo or placeholder
-    const photoSize = 220;
-    const photoX = 80;
-    const photoY = yOffset + 40;
+    const photoSize = 440;
+    const photoX = 160;
+    const photoY = yOffset + 80;
     
     // Draw photo background
     ctx.fillStyle = '#f0f0f0';
@@ -488,7 +540,7 @@ function drawPersonInfo(ctx, person, yOffset, width, height) {
     
     // Draw photo border
     ctx.strokeStyle = '#3498db';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 8;
     ctx.strokeRect(photoX, photoY, photoSize, photoSize);
     
     // Draw actual photo or placeholder icon
@@ -500,7 +552,7 @@ function drawPersonInfo(ctx, person, yOffset, width, height) {
         // Draw image immediately (synchronously)
         ctx.save();
         ctx.beginPath();
-        ctx.rect(photoX + 2, photoY + 2, photoSize - 4, photoSize - 4);
+        ctx.rect(photoX + 4, photoY + 4, photoSize - 8, photoSize - 8);
         ctx.clip();
         ctx.drawImage(img, photoX, photoY, photoSize, photoSize);
         ctx.restore();
@@ -508,67 +560,69 @@ function drawPersonInfo(ctx, person, yOffset, width, height) {
         // Draw photo number badge
         ctx.fillStyle = '#3498db';
         ctx.beginPath();
-        ctx.rect(photoX + photoSize - 30, photoY + photoSize - 30, 30, 30);
+        ctx.rect(photoX + photoSize - 60, photoY + photoSize - 60, 60, 60);
         ctx.fill();
         
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 16px Arial';
+        ctx.font = 'bold 32px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(person.id, photoX + photoSize - 15, photoY + photoSize - 10);
+        ctx.fillText(person.id, photoX + photoSize - 30, photoY + photoSize - 20);
     } else {
         // Draw placeholder icon
         ctx.fillStyle = '#bdc3c7';
-        ctx.font = '100px FontAwesome';
+        ctx.font = '200px FontAwesome';
         ctx.textAlign = 'center';
-        ctx.fillText('\uf007', photoX + (photoSize / 2), photoY + (photoSize / 2) + 35);
+        ctx.fillText('\uf007', photoX + (photoSize / 2), photoY + (photoSize / 2) + 70);
         
         // Draw photo number badge
         ctx.fillStyle = '#3498db';
         ctx.beginPath();
-        ctx.rect(photoX + photoSize - 30, photoY + photoSize - 30, 30, 30);
+        ctx.rect(photoX + photoSize - 60, photoY + photoSize - 60, 60, 60);
         ctx.fill();
         
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 16px Arial';
+        ctx.font = 'bold 32px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(person.id, photoX + photoSize - 15, photoY + photoSize - 10);
+        ctx.fillText(person.id, photoX + photoSize - 30, photoY + photoSize - 20);
     }
     
     // Draw person type badge
-    const typeBadgeWidth = 120;
-    const typeBadgeHeight = 30;
+    const typeBadgeWidth = 240;
+    const typeBadgeHeight = 60;
     const typeBadgeX = photoX + (photoSize / 2) - (typeBadgeWidth / 2);
-    const typeBadgeY = photoY + photoSize + 10;
+    const typeBadgeY = photoY + photoSize + 20;
     
     ctx.fillStyle = person.type === 'مشتەكی' ? '#27ae60' : '#e74c3c';
     ctx.beginPath();
-    ctx.roundRect(typeBadgeX, typeBadgeY, typeBadgeWidth, typeBadgeHeight, 15);
+    ctx.roundRect(typeBadgeX, typeBadgeY, typeBadgeWidth, typeBadgeHeight, 30);
     ctx.fill();
     
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 16px Arial';
+    ctx.font = 'bold 32px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(person.type, typeBadgeX + (typeBadgeWidth / 2), typeBadgeY + 20);
+    ctx.fillText(person.type, typeBadgeX + (typeBadgeWidth / 2), typeBadgeY + 40);
     
     // Draw person information
-    const infoX = 300;
-    const infoY = yOffset + 60;
+    const infoX = 600;
+    const infoY = yOffset + 120;
     
     ctx.fillStyle = '#2c3e50';
-    ctx.font = 'bold 22px Arial';
+    ctx.font = 'bold 44px Arial';
     ctx.textAlign = 'right';
     
-    ctx.fillText(`ناڤێ تومەتباری: ${person.name}`, width - 50, infoY + 40);
-    ctx.fillText(`ژدایـــكبون: ${person.birthdate}`, width - 50, infoY + 80);
-    ctx.fillText(`ئاكنجی بوون: ${person.address}`, width - 50, infoY + 120);
-    ctx.fillText(`ژمارا موبایلی: ${person.phone || 'غير متوفر'}`, width - 50, infoY + 160);
+    ctx.fillText(`ناڤێ تومەتباری: ${person.name}`, width - 100, infoY + 80);
+    ctx.fillText(`ژدایـــكبون: ${person.birthdate}`, width - 100, infoY + 160);
+    ctx.fillText(`ئاكنجی بوون: ${person.address}`, width - 100, infoY + 240);
+    ctx.fillText(`ژمارا موبایلی: ${person.phone || 'غير متوفر'}`, width - 100, infoY + 320);
 }
 
 function saveImageToDevice(dataUrl) {
+    // Create a high-quality version of the image
     const link = document.createElement('a');
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     link.download = `توماری-ئاریشە-${timestamp}.png`;
-    link.href = dataUrl;
+    // Ensure we're saving with maximum quality (1.0)
+    link.href = dataUrl.replace(/;base64,/, ';base64,').replace(/quality=\d+(\.\d+)?/, 'quality=1.0');
     link.click();
     
     // Also display the image in the success modal
