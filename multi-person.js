@@ -5,7 +5,7 @@ let personCount = 1;
 const MAX_PERSONS = 5;
 let personPhotos = {};
 let savedRecords = [];
-const STORAGE_KEY = 'problemRecords';
+const STORAGE_KEY = 'tomaryAresheRecords';
 
 function initApp() {
     // Initialize event listeners
@@ -13,12 +13,69 @@ function initApp() {
     document.getElementById('multi-person-form').addEventListener('submit', saveMultiPersonData);
     document.getElementById('share-whatsapp').addEventListener('click', shareViaWhatsapp);
     document.getElementById('new-entry').addEventListener('click', resetForm);
+    document.getElementById('close-records-modal').addEventListener('click', hideRecordsModal);
+    
+    // تهيئة أزرار التبويبات
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.getAttribute('data-tab');
+            
+            // تحديث الأزرار النشطة
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            // تحديث المحتوى النشط
+            tabContents.forEach(content => content.classList.remove('active'));
+            document.getElementById(targetId).classList.add('active');
+            
+            // تحديث قائمة السجلات عند الانتقال إلى تبويب السجلات
+            if (targetId === 'records-list') {
+                renderRecordsList();
+            }
+        });
+    });
+    
+    // تهيئة حقل البحث
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            if (searchTerm.trim() === '') {
+                renderRecordsList(); // عرض جميع السجلات إذا كان حقل البحث فارغًا
+            } else {
+                filterRecords(searchTerm); // تصفية السجلات بناءً على مصطلح البحث
+            }
+        });
+    }
+    
+    // إضافة زر مسح البحث
+    const clearSearchButton = document.getElementById('clear-search');
+    if (clearSearchButton && searchInput) {
+        clearSearchButton.addEventListener('click', () => {
+            searchInput.value = '';
+            renderRecordsList();
+        });
+    }
     
     // Initialize photo buttons for the first person
     initializePhotoButton(1);
     
     // Load saved records from localStorage
     loadSavedRecords();
+    
+    // تنشيط تبويب "سجل جديد" افتراضيًا
+    const newRecordTab = document.querySelector('.tab-btn[data-tab="new-record"]');
+    if (newRecordTab) {
+        newRecordTab.click();
+    }
+    
+    // إضافة وظيفة updateRecordsList لتوافق التصميم الجديد
+    window.updateRecordsList = function() {
+        renderRecordsList();
+    };
 }
 
 function initializePhotoButton(personId) {
@@ -218,16 +275,9 @@ function saveMultiPersonData(event) {
     // Generate and save the multi-person card
     const cardImage = generateMultiPersonCard(personsData, caseData);
     
-    // Save record to localStorage
-    saveRecord(personsData, caseData, cardImage);
-    
-    // تحديث قائمة السجلات إذا كانت مرئية
-    if (document.getElementById('records-list').classList.contains('active')) {
-        // استدعاء وظيفة تحديث قائمة السجلات المعرفة في سكريبت التبويبات
-        if (typeof updateRecordsList === 'function') {
-            updateRecordsList();
-        }
-    }
+    // Save record to localStorage with date for better sorting
+    const date = new Date();
+    saveRecord(personsData, caseData, cardImage, date);
     
     // Show success modal
     document.getElementById('success-modal').style.display = 'flex';
@@ -574,6 +624,52 @@ function shareViaWhatsapp() {
     }, 1000);
 }
 
+// وظيفة لحذف سجل
+function deleteRecord(recordId) {
+    // تأكيد الحذف
+    if (!confirm('هل أنت متأكد من حذف هذا السجل؟')) {
+        return;
+    }
+    
+    // البحث عن فهرس السجل
+    const recordIndex = savedRecords.findIndex(record => record.id === recordId);
+    if (recordIndex === -1) return;
+    
+    // حذف السجل من المصفوفة
+    savedRecords.splice(recordIndex, 1);
+    
+    // حفظ التغييرات في التخزين المحلي
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRecords));
+    
+    // تحديث قائمة السجلات
+    renderRecordsList();
+}
+
+// وظيفة لتنسيق الوقت بصيغة 12 ساعة
+function formatTime12Hour(timeString) {
+    if (!timeString) return '';
+    
+    try {
+        // تقسيم الوقت إلى ساعات ودقائق
+        const [hours, minutes] = timeString.split(':').map(Number);
+        
+        // التحقق من صحة القيم
+        if (isNaN(hours) || isNaN(minutes)) return timeString;
+        
+        // تحديد صباحًا/مساءً
+        const period = hours >= 12 ? 'م' : 'ص';
+        
+        // تحويل إلى صيغة 12 ساعة
+        const hours12 = hours % 12 || 12;
+        
+        // تنسيق الوقت
+        return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+    } catch (e) {
+        // إرجاع القيمة الأصلية في حالة حدوث خطأ
+        return timeString;
+    }
+}
+
 function resetForm() {
     // Hide modal
     document.getElementById('success-modal').style.display = 'none';
@@ -606,35 +702,42 @@ function resetForm() {
     addButton.disabled = false;
     addButton.style.opacity = '1';
     
+    // تنشيط تبويب "سجل جديد"
+    const newRecordTab = document.querySelector('.tab-btn[data-tab="new-record"]');
+    if (newRecordTab) {
+        newRecordTab.click();
+    }
+    
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // تحديث عرض السجلات عند إنشاء سجل جديد
+    const recordsListTab = document.querySelector('.tab-btn[data-tab="records-list"]');
+    if (recordsListTab && recordsListTab.classList.contains('active')) {
+        renderRecordsList();
+    }
 }
 
 // Records Management Functions
-function saveRecord(personsData, caseData, cardImage) {
+function saveRecord(personsData, caseData, cardImage, date) {
     // Create a record object
     const record = {
         id: Date.now().toString(), // Unique ID based on timestamp
-        timestamp: new Date().toISOString(),
-        persons: personsData,
-        problemType: caseData.issueType,
-        location: caseData.location,
-        timeFrom: caseData.timeFrom,
-        timeTo: caseData.timeTo,
-        period: caseData.period,
-        point: caseData.point,
-        sentTo: caseData.sentTo,
+        date: date ? date.toISOString() : new Date().toISOString(),
+        timestamp: new Date().toLocaleString('ar-IQ'),
+        personsData: personsData,
+        caseData: caseData,
         cardImage: cardImage // Store the original card image
     };
     
-    // Load existing records
-    const existingRecords = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    
     // Add to records array
-    existingRecords.unshift(record); // Add to beginning of array (newest first)
+    savedRecords.unshift(record); // Add to beginning of array (newest first)
     
     // Save to localStorage
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(existingRecords));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRecords));
+    
+    // تحديث قائمة السجلات عند حفظ سجل جديد
+    renderRecordsList();
 }
 
 function loadSavedRecords() {
@@ -642,12 +745,218 @@ function loadSavedRecords() {
     const storedRecords = localStorage.getItem(STORAGE_KEY);
     if (storedRecords) {
         savedRecords = JSON.parse(storedRecords);
+        
+        // ترتيب السجلات حسب التاريخ (الأحدث أولاً)
+        savedRecords.sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return dateB - dateA; // ترتيب تنازلي (الأحدث أولاً)
+        });
+        
         // We don't regenerate card images here to avoid DOM issues
         // Images will be regenerated when viewed instead
     }
 }
 
-// تم استبدال وظائف النافذة المنبثقة بنظام التبويبات
+// عرض السجلات في تبويب قائمة السجلات
+function displayRecords() {
+    const recordsContainer = document.getElementById('records-container');
+    const noRecordsMessage = document.getElementById('no-records-message');
+    
+    if (!recordsContainer) return;
+    
+    // تفريغ الحاوية
+    recordsContainer.innerHTML = '';
+    
+    if (savedRecords.length === 0) {
+        // إظهار رسالة عدم وجود سجلات
+        if (noRecordsMessage) {
+            noRecordsMessage.style.display = 'block';
+        }
+        return;
+    }
+    
+    // إخفاء رسالة عدم وجود سجلات
+    if (noRecordsMessage) {
+        noRecordsMessage.style.display = 'none';
+    }
+    
+    // إنشاء بطاقة لكل سجل
+    savedRecords.forEach((record, index) => {
+        const recordCard = document.createElement('div');
+        recordCard.className = 'record-card';
+        recordCard.dataset.recordIndex = index;
+        
+        // استخدام صورة الشخص الأول إذا كانت متوفرة
+        const firstPerson = record.personsData[0] || {};
+        const photoSrc = firstPerson.photo || '';
+        
+        recordCard.innerHTML = `
+            <div class="card-photo">
+                ${photoSrc ? `<img src="${photoSrc}" alt="صورة الشخص">` : '<i class="fas fa-user"></i>'}
+            </div>
+            <div class="card-info">
+                <div class="card-name">${firstPerson.name || 'بدون اسم'}</div>
+                <div class="card-type">${record.caseData.issueType || 'غير محدد'}</div>
+                <div class="card-date">${new Date(record.date).toLocaleDateString('ar-IQ') || ''}</div>
+            </div>
+        `;
+        
+        // إضافة حدث النقر لعرض تفاصيل السجل
+        recordCard.addEventListener('click', () => {
+            viewRecord(record.id);
+        });
+        
+        recordsContainer.appendChild(recordCard);
+    });
+}
+
+// تصفية السجلات بناءً على مصطلح البحث
+function filterRecords(searchTerm) {
+    const recordsList = document.getElementById('records-list');
+    const noRecordsMessage = document.getElementById('no-records-message');
+    
+    if (!recordsList) return;
+    
+    // تفريغ الحاوية
+    recordsList.innerHTML = '';
+    
+    // تصفية السجلات
+    const filteredRecords = savedRecords.filter(record => {
+        // البحث في أسماء الأشخاص
+        const nameMatch = record.personsData.some(person => 
+            person.name && person.name.toLowerCase().includes(searchTerm)
+        );
+        
+        // البحث في نوع القضية
+        const issueTypeMatch = record.caseData.issueType && 
+            record.caseData.issueType.toLowerCase().includes(searchTerm);
+        
+        // البحث في الموقع
+        const locationMatch = record.caseData.location && 
+            record.caseData.location.toLowerCase().includes(searchTerm);
+        
+        // البحث في اسم السائق
+        const driverMatch = record.caseData.driverName && 
+            record.caseData.driverName.toLowerCase().includes(searchTerm);
+            
+        // البحث في النقطة
+        const pointMatch = record.caseData.point && 
+            record.caseData.point.toLowerCase().includes(searchTerm);
+        
+        return nameMatch || issueTypeMatch || locationMatch || driverMatch || pointMatch;
+    });
+    
+    if (filteredRecords.length === 0) {
+        // إظهار رسالة عدم وجود سجلات
+        if (noRecordsMessage) {
+            noRecordsMessage.style.display = 'flex';
+            noRecordsMessage.innerHTML = '<p>لا توجد نتائج مطابقة لبحثك</p>';
+        }
+        return;
+    }
+    
+    // إخفاء رسالة عدم وجود سجلات
+    if (noRecordsMessage) {
+        noRecordsMessage.style.display = 'none';
+    }
+    
+    // إنشاء بطاقة لكل سجل مصفى
+    filteredRecords.forEach(record => {
+        const recordCard = document.createElement('div');
+        recordCard.className = 'record-card';
+        recordCard.dataset.recordId = record.id;
+        
+        // Format date
+        const recordDate = new Date(record.date);
+        const formattedDate = recordDate.toLocaleDateString('ar-IQ') + ' ' + 
+                             recordDate.toLocaleTimeString('ar-IQ', {hour: '2-digit', minute:'2-digit'});
+        
+        // Create card content with fallbacks for old record formats
+        let timeDisplay = '';
+        
+        // Handle both old and new time format
+        if (record.caseData.timeFrom && record.caseData.timeTo) {
+            // New format with timeFrom and timeTo
+            timeDisplay = `${formatTime12Hour(record.caseData.timeFrom) || '-'} - ${formatTime12Hour(record.caseData.timeTo) || '-'} (${record.caseData.period || '-'})`;
+        } else if (record.caseData.time) {
+            // Old format with time and dayNight
+            timeDisplay = `${formatTime12Hour(record.caseData.time) || '-'} (${record.caseData.dayNight || '-'})`;
+        } else {
+            timeDisplay = '-';
+        }
+        
+        // استخدام صورة الشخص الأول إذا كانت متوفرة
+        const firstPerson = record.personsData[0] || {};
+        const photoSrc = firstPerson.photo || '';
+        
+        recordCard.innerHTML = `
+            <div class="card-photo">
+                ${photoSrc ? `<img src="${photoSrc}" alt="صورة الشخص">` : '<i class="fas fa-user"></i>'}
+            </div>
+            <div class="card-info">
+                <div class="card-name">${firstPerson.name || 'بدون اسم'}</div>
+                <div class="card-type">${record.caseData.issueType || 'غير محدد'}</div>
+                <div class="card-date">${formattedDate}</div>
+                <p><strong>الأشخاص:</strong> ${record.personsData.length}</p>
+                <p><strong>المكان:</strong> ${record.caseData.location || '-'}</p>
+                <p><strong>الوقت:</strong> ${timeDisplay}</p>
+            </div>
+            <div class="record-actions">
+                <button class="action-button view-button" title="عرض">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="action-button delete-button" title="حذف">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        
+        // Add event listeners
+        const viewButton = recordCard.querySelector('.view-button');
+        const deleteButton = recordCard.querySelector('.delete-button');
+        
+        viewButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            viewRecord(record.id);
+        });
+        
+        deleteButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteRecord(record.id);
+        });
+        
+        // Add click event to the whole card
+        recordCard.addEventListener('click', () => {
+            viewRecord(record.id);
+        });
+        
+        recordsList.appendChild(recordCard);
+    });
+    
+    // تحديث عنوان القسم بعدد النتائج
+    const recordsCountHeader = document.querySelector('#records-list-tab h3');
+    if (recordsCountHeader) {
+        recordsCountHeader.textContent = `نتائج البحث (${filteredRecords.length})`;
+    }
+}
+
+function showRecordsModal() {
+    // تنشيط تبويب قائمة السجلات
+    const recordsListTab = document.querySelector('.tab-btn[data-tab="records-list"]');
+    if (recordsListTab) {
+        recordsListTab.click();
+    }
+}
+
+function hideRecordsModal() {
+    // Hide the records modal
+    document.getElementById('records-modal').style.display = 'none';
+}
+
+function renderRecordsList() {
+    const recordsList = document.getElementById('records-list');
+    const noRecordsMessage = document.getElementById('no-records-message');
     
     // Clear the current list
     recordsList.innerHTML = '';
@@ -685,12 +994,22 @@ function loadSavedRecords() {
             timeDisplay = '-';
         }
         
+        // Get the first person's photo if available
+        const firstPerson = record.personsData[0] || {};
+        const photoSrc = firstPerson.photo || '';
+        
         recordCard.innerHTML = `
-            <h4>${record.caseData.issueType || 'بدون عنوان'}</h4>
-            <p><strong>الأشخاص:</strong> ${record.personsData.length}</p>
-            <p><strong>المكان:</strong> ${record.caseData.location || '-'}</p>
-            <p><strong>الوقت:</strong> ${timeDisplay}</p>
-            <div class="record-date">${formattedDate}</div>
+            <div class="card-photo">
+                ${photoSrc ? `<img src="${photoSrc}" alt="صورة الشخص">` : '<i class="fas fa-user"></i>'}
+            </div>
+            <div class="card-info">
+                <div class="card-name">${firstPerson.name || 'بدون اسم'}</div>
+                <div class="card-type">${record.caseData.issueType || 'غير محدد'}</div>
+                <div class="card-date">${formattedDate}</div>
+                <p><strong>الأشخاص:</strong> ${record.personsData.length}</p>
+                <p><strong>المكان:</strong> ${record.caseData.location || '-'}</p>
+                <p><strong>الوقت:</strong> ${timeDisplay}</p>
+            </div>
             <div class="record-actions">
                 <button class="action-button view-button" title="عرض">
                     <i class="fas fa-eye"></i>
@@ -722,28 +1041,58 @@ function loadSavedRecords() {
         
         recordsList.appendChild(recordCard);
     });
+    
+    // تحديث عنوان القسم بعدد السجلات
+    const recordsCountHeader = document.querySelector('#records-list-tab h3');
+    if (recordsCountHeader) {
+        recordsCountHeader.textContent = `السجلات المحفوظة (${savedRecords.length})`;
+    }
 }
 
 function viewRecord(recordId) {
-    // Find the record
+    // البحث عن السجل بواسطة المعرف
     const record = savedRecords.find(r => r.id === recordId);
     if (!record) return;
     
-    // Create a modal to display the record
-    const viewModal = document.createElement('div');
-    viewModal.className = 'modal';
-    viewModal.id = 'view-record-modal';
-    viewModal.style.display = 'flex';
+    const modal = document.getElementById('view-record-modal') || document.createElement('div');
+    if (!document.getElementById('view-record-modal')) {
+        modal.className = 'modal';
+        modal.id = 'view-record-modal';
+        document.body.appendChild(modal);
+    }
     
-    // Use the stored card image
-    // We don't regenerate to avoid DOM-related errors
-    viewModal.innerHTML = `
+    // Create content for the modal
+    modal.innerHTML = `
         <div class="modal-content view-record-modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-file-alt"></i> عرض السجل</h3>
+                <h3><i class="fas fa-file-alt"></i> تفاصيل السجل</h3>
                 <button id="close-view-record-modal" class="close-button">
                     <i class="fas fa-times"></i>
                 </button>
+            </div>
+            <div class="record-details">
+                <div class="case-details">
+                    <h3>معلومات القضية</h3>
+                    <p><strong>نوع القضية:</strong> ${record.caseData.issueType || 'غير محدد'}</p>
+                    <p><strong>الوقت:</strong> ${record.caseData.timeFrom ? `${formatTime12Hour(record.caseData.timeFrom)} - ${formatTime12Hour(record.caseData.timeTo)}` : 'غير محدد'}</p>
+                    <p><strong>الموقع:</strong> ${record.caseData.location || 'غير محدد'}</p>
+                    <p><strong>اسم السائق:</strong> ${record.caseData.driverName || 'غير محدد'}</p>
+                    <p><strong>النقطة:</strong> ${record.caseData.point || 'غير محدد'}</p>
+                    <p><strong>الإرسال إلى:</strong> ${record.caseData.sentTo || 'غير محدد'}</p>
+                </div>
+                
+                <h3>معلومات الأشخاص</h3>
+                ${record.personsData.map((person, idx) => `
+                    <div class="person-details">
+                        <h4>الشخص ${idx + 1}</h4>
+                        ${person.photo ? `<img src="${person.photo}" alt="صورة الشخص" class="person-photo">` : ''}
+                        <p><strong>النوع:</strong> ${person.type || 'غير محدد'}</p>
+                        <p><strong>الاسم الكامل:</strong> ${person.name || 'غير محدد'}</p>
+                        <p><strong>تاريخ الميلاد:</strong> ${person.birthdate || 'غير محدد'}</p>
+                        <p><strong>العنوان:</strong> ${person.address || 'غير محدد'}</p>
+                        <p><strong>رقم الهاتف:</strong> ${person.phone || 'غير محدد'}</p>
+                    </div>
+                `).join('')}
             </div>
             <div class="view-record-container">
                 <img src="${record.cardImage}" alt="بطاقة السجل" class="record-image">
@@ -752,15 +1101,33 @@ function viewRecord(recordId) {
                 <button id="download-record-image" class="action-button">
                     <i class="fas fa-download"></i> تنزيل الصورة
                 </button>
+                <button id="share-record-whatsapp" class="action-button">
+                    <i class="fab fa-whatsapp"></i> مشاركة عبر واتساب
+                </button>
+                <button id="close-view-record-button" class="action-button secondary">
+                    <i class="fas fa-times"></i> إغلاق
+                </button>
             </div>
         </div>
     `;
     
-    document.body.appendChild(viewModal);
+    modal.style.display = 'flex';
     
     // Add event listeners
     document.getElementById('close-view-record-modal').addEventListener('click', () => {
-        viewModal.remove();
+    modal.style.display = 'none';
+});
+
+// إضافة حدث للعودة إلى قائمة السجلات
+const backToRecordsButton = document.getElementById('back-to-records');
+if (backToRecordsButton) {
+    backToRecordsButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+}
+    
+    document.getElementById('close-view-record-button').addEventListener('click', () => {
+        modal.style.display = 'none';
     });
     
     document.getElementById('download-record-image').addEventListener('click', () => {
@@ -768,6 +1135,10 @@ function viewRecord(recordId) {
         link.download = `توماری-ئاریشە-${new Date(record.date).toISOString().replace(/[:.]/g, '-')}.png`;
         link.href = record.cardImage;
         link.click();
+    });
+    
+    document.getElementById('share-record-whatsapp').addEventListener('click', () => {
+        window.open('https://wa.me/?text=توماری ئاریشە', '_blank');
     });
 }
 
