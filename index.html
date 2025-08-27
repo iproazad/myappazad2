@@ -884,8 +884,6 @@
                 // تهيئة المتغيرات
                 const photoInput = document.getElementById('photo-input');
                 const photoPreview = document.getElementById('photo-preview');
-                const cameraBtn = document.getElementById('camera-btn');
-                const galleryBtn = document.getElementById('gallery-btn');
                 const recordForm = document.getElementById('record-form');
                 const recordsContainer = document.getElementById('records-container');
                 const cardModal = document.getElementById('card-modal');
@@ -932,18 +930,11 @@
                         }
                     });
                     
-                    // زر الكاميرا
-                    if (cameraBtn) {
-                        cameraBtn.addEventListener('click', function() {
-                            photoInput.setAttribute('capture', 'environment');
-                            photoInput.click();
-                        });
-                    }
-                    
-                    // زر المعرض
-                    if (galleryBtn) {
-                        galleryBtn.addEventListener('click', function() {
-                            photoInput.removeAttribute('capture');
+                    // زر الصورة الموحد
+                    const photoButton = document.getElementById('photo-button');
+                    if (photoButton) {
+                        photoButton.addEventListener('click', function() {
+                            // النقر مباشرة على زر اختيار الصورة بدون رسالة تأكيد
                             photoInput.click();
                         });
                     }
@@ -966,13 +957,9 @@
                                 <i class="fas fa-user"></i>
                             </div>
                             <div class="photo-buttons">
-                                <button type="button" id="camera-btn" class="photo-btn">
+                                <button type="button" id="photo-button" class="photo-btn">
                                     <i class="fas fa-camera"></i>
-                                    الكاميرا
-                                </button>
-                                <button type="button" id="gallery-btn" class="photo-btn">
-                                    <i class="fas fa-images"></i>
-                                    المعرض
+                                    وێنەگرتن یان باركرن
                                 </button>
                             </div>
                             <input type="file" id="photo-input" accept="image/*" style="display: none;">
@@ -1187,8 +1174,39 @@
                     تحميل
                 </button>
             </div>
+            <div style="text-align: center; margin-top: 10px; font-size: 0.8rem; color: #666;">
+                <p>إذا لم تظهر البطاقة بشكل صحيح، يرجى النقر على زر التحميل لحفظ البطاقة</p>
+            </div>
         </div>
     </div>
+    
+    <!-- إضافة سكريبت لتحسين تجربة المستخدم على الأجهزة المحمولة -->
+    <script>
+        // التأكد من أن النافذة المنبثقة تعمل بشكل صحيح على الأجهزة المحمولة
+        document.addEventListener('DOMContentLoaded', function() {
+            // إضافة استماع لحدث النقر على زر المشاركة
+            document.getElementById('share-btn').addEventListener('click', function() {
+                // التحقق من دعم واجهة مشاركة الويب
+                if (navigator.share) {
+                    // استخدام واجهة مشاركة الويب على الأجهزة المحمولة
+                    html2canvas(document.querySelector('.full-card')).then(canvas => {
+                        canvas.toBlob(function(blob) {
+                            const file = new File([blob], 'suspect-card.png', { type: 'image/png' });
+                            navigator.share({
+                                title: 'بطاقة معلومات المتهم',
+                                files: [file]
+                            }).catch(error => {
+                                console.error('خطأ في المشاركة:', error);
+                                alert('حدث خطأ أثناء محاولة المشاركة');
+                            });
+                        });
+                    });
+                } else {
+                    alert('المشاركة غير مدعومة على هذا الجهاز');
+                }
+            });
+        });
+    </script>
 
     <!-- JavaScript -->
     <script>
@@ -1209,20 +1227,9 @@
         // معالجة الصورة
         const photoInput = document.getElementById('photo-input');
         const photoPreview = document.getElementById('photo-preview');
-        const cameraBtn = document.getElementById('camera-btn');
-        const galleryBtn = document.getElementById('gallery-btn');
+        const photoButton = document.getElementById('photo-button');
         
-        // زر الكاميرا
-        cameraBtn.addEventListener('click', () => {
-            photoInput.setAttribute('capture', 'environment');
-            photoInput.click();
-        });
-        
-        // زر المعرض
-        galleryBtn.addEventListener('click', () => {
-            photoInput.removeAttribute('capture');
-            photoInput.click();
-        });
+        // تم نقل معالج الحدث لزر الصورة إلى مكان آخر في الكود
         
         // معاينة الصورة المختارة
         photoInput.addEventListener('change', (e) => {
@@ -1292,8 +1299,14 @@
             // تحديث قائمة السجلات
             loadRecords();
             
-            // فتح بطاقة المعلومات
-            showCardModal(record);
+            // فتح بطاقة المعلومات بعد تأخير قصير للتأكد من جاهزية الصفحة
+            setTimeout(() => {
+                // إعادة تعيين موضع التمرير للصفحة لضمان رؤية النافذة المنبثقة
+                window.scrollTo(0, 0);
+                showCardModal(record);
+                // التمرير إلى أعلى الصفحة لضمان رؤية النافذة المنبثقة
+                window.scrollTo(0, 0);
+            }, 300);
         });
         
         // تحميل السجلات من localStorage
@@ -1477,20 +1490,42 @@
                 </div>
             `;
             
-            // عرض النافذة المنبثقة
+            // إعادة تعيين موضع التمرير للصفحة
+            window.scrollTo(0, 0);
+            
+            // عرض النافذة المنبثقة مع تأثير انتقالي
+            cardModal.style.opacity = '0';
             cardModal.style.display = 'block';
+            
+            // تأخير قصير لضمان تطبيق التأثير الانتقالي
+            setTimeout(() => {
+                cardModal.style.opacity = '1';
+                // تمرير إلى أعلى النافذة المنبثقة
+                cardModal.scrollTop = 0;
+            }, 50);
         }
         
         // إغلاق النافذة المنبثقة
         document.querySelector('.close-modal').addEventListener('click', () => {
-            document.getElementById('card-modal').style.display = 'none';
+            const cardModal = document.getElementById('card-modal');
+            // إضافة تأثير انتقالي عند الإغلاق
+            cardModal.style.opacity = '0';
+            setTimeout(() => {
+                cardModal.style.display = 'none';
+                cardModal.style.opacity = '1';
+            }, 300);
         });
         
         // إغلاق النافذة المنبثقة عند النقر خارجها
         window.addEventListener('click', (e) => {
             const modal = document.getElementById('card-modal');
             if (e.target === modal) {
-                modal.style.display = 'none';
+                // إضافة تأثير انتقالي عند الإغلاق
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    modal.style.opacity = '1';
+                }, 300);
             }
         });
         
@@ -1505,7 +1540,11 @@
                 const script = document.createElement('script');
                 script.src = 'https://html2canvas.hertzen.com/dist/html2canvas.min.js';
                 script.onload = () => resolve(window.html2canvas);
-                script.onerror = reject;
+                script.onerror = (error) => {
+                    console.error('فشل تحميل مكتبة html2canvas:', error);
+                    alert('فشل تحميل مكتبة التصوير. يرجى التحقق من اتصالك بالإنترنت وإعادة المحاولة.');
+                    reject(error);
+                };
                 document.body.appendChild(script);
             });
         }
@@ -1513,32 +1552,57 @@
         // مشاركة البطاقة
         document.getElementById('share-btn').addEventListener('click', async () => {
             try {
+                // إظهار رسالة تحميل
+                const loadingMessage = document.createElement('div');
+                loadingMessage.style.position = 'fixed';
+                loadingMessage.style.top = '50%';
+                loadingMessage.style.left = '50%';
+                loadingMessage.style.transform = 'translate(-50%, -50%)';
+                loadingMessage.style.background = 'rgba(0, 0, 0, 0.7)';
+                loadingMessage.style.color = 'white';
+                loadingMessage.style.padding = '15px 20px';
+                loadingMessage.style.borderRadius = '5px';
+                loadingMessage.style.zIndex = '2000';
+                loadingMessage.style.textAlign = 'center';
+                loadingMessage.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء الصورة...';
+                document.body.appendChild(loadingMessage);
+                
                 const html2canvas = await loadHtml2Canvas();
                 const cardPreview = document.getElementById('card-preview');
-                const canvas = await html2canvas(cardPreview.querySelector('.full-card'), { scale: 3 });
+                
+                // تحسين جودة الصورة
+                const canvas = await html2canvas(cardPreview.querySelector('.full-card'), { 
+                    scale: 3,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null
+                });
+                
+                // إزالة رسالة التحميل
+                document.body.removeChild(loadingMessage);
                 
                 canvas.toBlob(async (blob) => {
                     const fileName = `بطاقة_تومەتبار_${Date.now()}.png`;
                     const file = new File([blob], fileName, { type: 'image/png' });
                     
-                    if (navigator.share) {
+                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                         try {
                             await navigator.share({
                                 title: 'توماركرنا تومەتبارا',
-                                text: `بطاقة معلومات: ${document.querySelector('.card-name').textContent}`,
                                 files: [file]
                             });
                         } catch (error) {
                             console.error('خطأ في المشاركة:', error);
                             // إذا فشلت المشاركة، نقوم بالتنزيل
                             downloadCanvas(canvas, fileName);
+                            alert('تم حفظ الصورة في جهازك');
                         }
                     } else {
                         // إذا كانت واجهة المشاركة غير مدعومة، نقوم بالتنزيل
                         downloadCanvas(canvas, fileName);
                         alert('تم حفظ الصورة في جهازك');
                     }
-                });
+                }, 'image/png', 0.95);
             } catch (error) {
                 console.error('خطأ في إنشاء الصورة:', error);
                 alert('حدث خطأ أثناء إنشاء الصورة');
@@ -1548,12 +1612,38 @@
         // تنزيل البطاقة
         document.getElementById('download-btn').addEventListener('click', async () => {
             try {
+                // إظهار رسالة تحميل
+                const loadingMessage = document.createElement('div');
+                loadingMessage.style.position = 'fixed';
+                loadingMessage.style.top = '50%';
+                loadingMessage.style.left = '50%';
+                loadingMessage.style.transform = 'translate(-50%, -50%)';
+                loadingMessage.style.background = 'rgba(0, 0, 0, 0.7)';
+                loadingMessage.style.color = 'white';
+                loadingMessage.style.padding = '15px 20px';
+                loadingMessage.style.borderRadius = '5px';
+                loadingMessage.style.zIndex = '2000';
+                loadingMessage.style.textAlign = 'center';
+                loadingMessage.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء الصورة...';
+                document.body.appendChild(loadingMessage);
+                
                 const html2canvas = await loadHtml2Canvas();
                 const cardPreview = document.getElementById('card-preview');
-                const canvas = await html2canvas(cardPreview.querySelector('.full-card'), { scale: 3 });
+                
+                // تحسين جودة الصورة
+                const canvas = await html2canvas(cardPreview.querySelector('.full-card'), { 
+                    scale: 3,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null
+                });
+                
+                // إزالة رسالة التحميل
+                document.body.removeChild(loadingMessage);
                 
                 const fileName = `بطاقة_تومەتبار_${Date.now()}.png`;
                 downloadCanvas(canvas, fileName);
+                alert('تم حفظ الصورة في جهازك');
             } catch (error) {
                 console.error('خطأ في إنشاء الصورة:', error);
                 alert('حدث خطأ أثناء إنشاء الصورة');
@@ -1562,10 +1652,23 @@
         
         // تنزيل الصورة من الكانفاس
         function downloadCanvas(canvas, fileName) {
-            const link = document.createElement('a');
-            link.download = fileName;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+            try {
+                // تحسين جودة الصورة عند التنزيل
+                const imageData = canvas.toDataURL('image/png', 0.95);
+                
+                // إنشاء رابط للتنزيل
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = imageData;
+                
+                // إضافة الرابط للصفحة وتفعيله ثم إزالته
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error('خطأ في تنزيل الصورة:', error);
+                alert('حدث خطأ أثناء محاولة تنزيل الصورة');
+            }
         }
         
         // تحميل السجلات عند فتح الصفحة
