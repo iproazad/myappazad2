@@ -150,6 +150,45 @@
             color: #e74c3c;
             font-size: 1.2rem;
         }
+        
+        /* تنسيقات زر إضافة إلى الشاشة الرئيسية */
+        .add-to-home-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 25px;
+            margin: 25px auto 15px;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .add-to-home-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .add-to-home-button i {
+            margin-left: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .add-to-home-button.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -176,6 +215,11 @@
                 <p>جورێ توماركرنێ هەلبژێرە بو بەردەوامبونێ</p>
             </div>
             
+            <button id="add-to-home-screen" class="add-to-home-button">
+                <i class="fas fa-mobile-alt"></i>
+                ئەزبەنە بو سەرشاشە
+            </button>
+            
             <div class="visitor-info">
                 <div class="eyes-container">
                     <div class="eye left-eye">
@@ -194,6 +238,7 @@
 
     <!-- Register Service Worker for PWA -->
     <script>
+        // تسجيل Service Worker للـ PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./service-worker.js')
@@ -205,6 +250,66 @@
                     });
             });
         }
+        
+        // متغيرات لإضافة التطبيق إلى الشاشة الرئيسية
+        let deferredPrompt;
+        const addToHomeBtn = document.getElementById('add-to-home-screen');
+        
+        // إظهار الزر دائمًا في البداية
+        // addToHomeBtn.classList.add('hidden');
+        
+        // الاستماع لحدث beforeinstallprompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // منع ظهور النافذة المنبثقة التلقائية
+            e.preventDefault();
+            // تخزين الحدث للاستخدام لاحقًا
+            deferredPrompt = e;
+            // إظهار زر إضافة إلى الشاشة الرئيسية
+            addToHomeBtn.classList.remove('hidden');
+        });
+        
+        // إضافة مستمع حدث للزر
+        addToHomeBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                return;
+            }
+            // إظهار نافذة تثبيت التطبيق
+            deferredPrompt.prompt();
+            // انتظار اختيار المستخدم
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            // لم نعد بحاجة إلى المتغير بعد الآن
+            deferredPrompt = null;
+            // إخفاء الزر بعد الاستخدام
+            addToHomeBtn.classList.add('hidden');
+        });
+        
+        // إخفاء الزر إذا كان التطبيق مثبتًا بالفعل
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            deferredPrompt = null;
+            addToHomeBtn.classList.add('hidden');
+        });
+        
+        // التحقق مما إذا كان المستخدم يستخدم iOS وإضافة تعليمات خاصة
+        document.addEventListener('DOMContentLoaded', () => {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const addToHomeBtn = document.getElementById('add-to-home-screen');
+            
+            if (isIOS) {
+                // تغيير وظيفة الزر لعرض تعليمات iOS
+                addToHomeBtn.addEventListener('click', () => {
+                    alert('لإضافة التطبيق إلى الشاشة الرئيسية على iOS:\n\n1. اضغط على زر المشاركة (شكل مربع مع سهم للأعلى) في أسفل المتصفح\n2. قم بالتمرير للأسفل واضغط على "إضافة إلى الشاشة الرئيسية"\n3. اضغط على "إضافة" في الزاوية العليا اليمنى');
+                });
+            } else {
+                // للأجهزة الأخرى، تأكد من أن الزر يظهر عندما يكون التطبيق قابلاً للتثبيت
+                if (!deferredPrompt) {
+                    addToHomeBtn.addEventListener('click', () => {
+                        alert('يمكنك تثبيت هذا التطبيق على جهازك للوصول إليه بسهولة من الشاشة الرئيسية. استخدم إعدادات المتصفح لتثبيت التطبيق.');
+                    });
+                }
+            }
+        });
         
         // زيادة عداد الزيارات وتحريك العيون
         document.addEventListener('DOMContentLoaded', function() {
