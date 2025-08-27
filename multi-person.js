@@ -6,6 +6,7 @@ const MAX_PERSONS = 5;
 let personPhotos = {};
 let savedRecords = [];
 const STORAGE_KEY = 'tomaryAresheRecords';
+let currentViewingRecordId = null; // معرف السجل الحالي الذي يتم عرضه
 
 function initApp() {
     // Initialize event listeners
@@ -1054,6 +1055,9 @@ function viewRecord(recordId) {
     const record = savedRecords.find(r => r.id === recordId);
     if (!record) return;
     
+    // تخزين معرف السجل الحالي للاستخدام في الوظائف الأخرى
+    currentViewingRecordId = recordId;
+    
     const modal = document.getElementById('view-record-modal') || document.createElement('div');
     if (!document.getElementById('view-record-modal')) {
         modal.className = 'modal';
@@ -1061,48 +1065,27 @@ function viewRecord(recordId) {
         document.body.appendChild(modal);
     }
     
-    // Create content for the modal
+    // Create content for the modal - عرض فقط بطاقة السجل والأزرار المطلوبة
     modal.innerHTML = `
         <div class="modal-content view-record-modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-file-alt"></i> تفاصيل السجل</h3>
+                <h3><i class="fas fa-file-alt"></i> بطاقة السجل</h3>
                 <button id="close-view-record-modal" class="close-button">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="record-details">
-                <div class="case-details">
-                    <h3>معلومات القضية</h3>
-                    <p><strong>نوع القضية:</strong> ${record.caseData.issueType || 'غير محدد'}</p>
-                    <p><strong>الوقت:</strong> ${record.caseData.timeFrom ? `${formatTime12Hour(record.caseData.timeFrom)} - ${formatTime12Hour(record.caseData.timeTo)}` : 'غير محدد'}</p>
-                    <p><strong>الموقع:</strong> ${record.caseData.location || 'غير محدد'}</p>
-                    <p><strong>اسم السائق:</strong> ${record.caseData.driverName || 'غير محدد'}</p>
-                    <p><strong>النقطة:</strong> ${record.caseData.point || 'غير محدد'}</p>
-                    <p><strong>الإرسال إلى:</strong> ${record.caseData.sentTo || 'غير محدد'}</p>
-                </div>
-                
-                <h3>معلومات الأشخاص</h3>
-                ${record.personsData.map((person, idx) => `
-                    <div class="person-details">
-                        <h4>الشخص ${idx + 1}</h4>
-                        ${person.photo ? `<img src="${person.photo}" alt="صورة الشخص" class="person-photo">` : ''}
-                        <p><strong>النوع:</strong> ${person.type || 'غير محدد'}</p>
-                        <p><strong>الاسم الكامل:</strong> ${person.name || 'غير محدد'}</p>
-                        <p><strong>تاريخ الميلاد:</strong> ${person.birthdate || 'غير محدد'}</p>
-                        <p><strong>العنوان:</strong> ${person.address || 'غير محدد'}</p>
-                        <p><strong>رقم الهاتف:</strong> ${person.phone || 'غير محدد'}</p>
-                    </div>
-                `).join('')}
-            </div>
-            <div class="view-record-container">
+            <div class="view-record-container" style="display: flex; justify-content: center; align-items: center; padding: 10px;">
                 <img src="${record.cardImage}" alt="بطاقة السجل" class="record-image">
             </div>
             <div class="modal-footer">
-                <button id="download-record-image" class="action-button">
-                    <i class="fas fa-download"></i> تنزيل الصورة
+                <button id="save-record-card" class="action-button">
+                    <i class="fas fa-save"></i> خەزنكرنا كارتێ
                 </button>
                 <button id="share-record-whatsapp" class="action-button">
                     <i class="fab fa-whatsapp"></i> مشاركة عبر واتساب
+                </button>
+                <button id="add-new-record" class="action-button">
+                    <i class="fas fa-plus"></i> إضافة سجل جديد
                 </button>
                 <button id="close-view-record-button" class="action-button secondary">
                     <i class="fas fa-times"></i> إغلاق
@@ -1114,32 +1097,11 @@ function viewRecord(recordId) {
     modal.style.display = 'flex';
     
     // Add event listeners
-    document.getElementById('close-view-record-modal').addEventListener('click', () => {
-    modal.style.display = 'none';
-});
-
-// إضافة حدث للعودة إلى قائمة السجلات
-const backToRecordsButton = document.getElementById('back-to-records');
-if (backToRecordsButton) {
-    backToRecordsButton.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
-}
-    
-    document.getElementById('close-view-record-button').addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
-    
-    document.getElementById('download-record-image').addEventListener('click', () => {
-        const link = document.createElement('a');
-        link.download = `توماری-ئاریشە-${new Date(record.date).toISOString().replace(/[:.]/g, '-')}.png`;
-        link.href = record.cardImage;
-        link.click();
-    });
-    
-    document.getElementById('share-record-whatsapp').addEventListener('click', () => {
-        window.open('https://wa.me/?text=توماری ئاریشە', '_blank');
-    });
+    document.getElementById('close-view-record-modal').addEventListener('click', closeRecordDetails);
+    document.getElementById('close-view-record-button').addEventListener('click', closeRecordDetails);
+    document.getElementById('save-record-card').addEventListener('click', saveCurrentRecordCard);
+    document.getElementById('share-record-whatsapp').addEventListener('click', shareRecordViaWhatsapp);
+    document.getElementById('add-new-record').addEventListener('click', addNewRecordFromDetails);
 }
 
 function deleteRecord(recordId) {
@@ -1180,6 +1142,62 @@ function formatTime12Hour(time24) {
     } catch (error) {
         console.error('Error formatting time:', error);
         return '-';
+    }
+}
+
+// وظيفة لإغلاق نافذة تفاصيل السجل
+function closeRecordDetails() {
+    const modal = document.getElementById('view-record-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// وظيفة لحفظ بطاقة السجل الحالي
+function saveCurrentRecordCard() {
+    if (!currentViewingRecordId) return;
+    
+    const record = savedRecords.find(r => r.id === currentViewingRecordId);
+    if (!record) return;
+    
+    // إنشاء رابط تنزيل للصورة
+    const link = document.createElement('a');
+    link.download = `توماری-ئاریشە-${new Date(record.date).toISOString().replace(/[:.]/g, '-')}.png`;
+    link.href = record.cardImage;
+    link.click();
+}
+
+// وظيفة لمشاركة السجل الحالي عبر واتساب
+function shareRecordViaWhatsapp() {
+    if (!currentViewingRecordId) return;
+    
+    const record = savedRecords.find(r => r.id === currentViewingRecordId);
+    if (!record) return;
+    
+    // إنشاء نص مناسب للمشاركة
+    const firstPerson = record.personsData[0] || {};
+    const personName = firstPerson.name || 'غير محدد';
+    const issueType = record.caseData.issueType || 'غير محدد';
+    const formattedDate = new Date(record.date).toLocaleDateString('ar-IQ');
+    
+    const shareText = `توماری ئاریشە - ${personName} - ${issueType} - ${formattedDate}`;
+    
+    // فتح واتساب مع النص المناسب
+    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+}
+
+// وظيفة لإضافة سجل جديد من نافذة التفاصيل
+function addNewRecordFromDetails() {
+    // إغلاق نافذة التفاصيل
+    closeRecordDetails();
+    
+    // إعادة تعيين النموذج وإظهار تبويب سجل جديد
+    resetForm();
+    
+    // تنشيط تبويب "سجل جديد"
+    const newRecordTab = document.querySelector('.tab-btn[data-tab="new-record"]');
+    if (newRecordTab) {
+        newRecordTab.click();
     }
 }
 
