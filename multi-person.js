@@ -772,8 +772,13 @@ function resetForm() {
         newRecordTab.click();
     }
     
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // التمرير إلى أعلى الصفحة بشكل فوري
+    window.scrollTo(0, 0);
+    
+    // تأكيد التمرير بعد فترة قصيرة
+    setTimeout(() => {
+        window.scrollTo(0, 0);
+    }, 100);
     
     // تحديث عرض السجلات عند إنشاء سجل جديد
     const recordsListTab = document.querySelector('.tab-btn[data-tab="records-list"]');
@@ -1295,6 +1300,11 @@ function addNewInformation() {
         dataEntryTab.click();
     }
     
-    // التمرير إلى أعلى الصفحة
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // التمرير إلى أعلى الصفحة بشكل فوري
+    window.scrollTo(0, 0);
+    
+    // تأكيد التمرير بعد فترة قصيرة
+    setTimeout(() => {
+        window.scrollTo(0, 0);
+    }, 100);
 }

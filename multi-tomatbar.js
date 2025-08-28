@@ -1295,16 +1295,32 @@ function addNewInformation() {
     // إعادة تعيين النموذج للسماح بإدخال معلومات جديدة
     document.getElementById('multi-person-form').reset();
     
-    // إعادة تعيين صورة الشخص
-    const selectedPhoto = document.getElementById('selected-photo');
-    const defaultPhotoIcon = document.getElementById('default-photo-icon');
-    if (selectedPhoto && defaultPhotoIcon) {
-        selectedPhoto.style.display = 'none';
-        defaultPhotoIcon.style.display = 'block';
+    // إعادة تعيين صورة الشخص الأول
+    const firstPersonPhoto = document.getElementById('selected-photo-1');
+    const firstPersonIcon = document.getElementById('default-photo-icon-1');
+    if (firstPersonPhoto && firstPersonIcon) {
+        firstPersonPhoto.style.display = 'none';
+        firstPersonIcon.style.display = 'block';
     }
     
-    // إعادة تعيين متغير الصور
+    // حذف جميع حاويات الأشخاص باستثناء الأولى
+    const personContainers = document.querySelectorAll('.person-container');
+    personContainers.forEach((container, index) => {
+        if (index > 0) { // الاحتفاظ بحاوية الشخص الأول
+            container.remove();
+        }
+    });
+    
+    // إعادة تعيين متغير الصور والعداد
     personPhotos = {};
+    personCount = 1;
+    
+    // تمكين زر الإضافة
+    const addButton = document.getElementById('add-person-button');
+    if (addButton) {
+        addButton.disabled = false;
+        addButton.style.opacity = '1';
+    }
     
     // التبديل إلى تبويب إدخال البيانات إذا كنا في تبويب آخر
     const dataEntryTab = document.querySelector('.tab-btn[data-tab="data-entry"]');
@@ -1312,6 +1328,11 @@ function addNewInformation() {
         dataEntryTab.click();
     }
     
-    // التمرير إلى أعلى الصفحة
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // التمرير إلى أعلى الصفحة بشكل فوري
+    window.scrollTo(0, 0);
+    
+    // تأكيد التمرير بعد فترة قصيرة
+    setTimeout(() => {
+        window.scrollTo(0, 0);
+    }, 100);
 }
