@@ -25,6 +25,11 @@ function initApp() {
         newEntryBtn.addEventListener('click', resetForm);
     }
     
+    const addInfoBtn = document.getElementById('add-info-button');
+    if (addInfoBtn) {
+        addInfoBtn.addEventListener('click', addNewInformation);
+    }
+    
     const closeRecordsModalBtn = document.getElementById('close-records-modal');
     if (closeRecordsModalBtn) {
         closeRecordsModalBtn.addEventListener('click', hideRecordsModal);
@@ -1283,4 +1288,30 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
         this.closePath();
         return this;
     };
+}
+
+// وظيفة لإضافة معلومات جديدة
+function addNewInformation() {
+    // إعادة تعيين النموذج للسماح بإدخال معلومات جديدة
+    document.getElementById('multi-person-form').reset();
+    
+    // إعادة تعيين صورة الشخص
+    const selectedPhoto = document.getElementById('selected-photo');
+    const defaultPhotoIcon = document.getElementById('default-photo-icon');
+    if (selectedPhoto && defaultPhotoIcon) {
+        selectedPhoto.style.display = 'none';
+        defaultPhotoIcon.style.display = 'block';
+    }
+    
+    // إعادة تعيين متغير الصور
+    personPhotos = {};
+    
+    // التبديل إلى تبويب إدخال البيانات إذا كنا في تبويب آخر
+    const dataEntryTab = document.querySelector('.tab-btn[data-tab="data-entry"]');
+    if (dataEntryTab) {
+        dataEntryTab.click();
+    }
+    
+    // التمرير إلى أعلى الصفحة
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }

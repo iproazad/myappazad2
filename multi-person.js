@@ -14,6 +14,12 @@ function initApp() {
     document.getElementById('multi-person-form').addEventListener('submit', saveMultiPersonData);
     document.getElementById('share-whatsapp').addEventListener('click', shareViaWhatsapp);
     document.getElementById('new-entry').addEventListener('click', resetForm);
+    
+    const addInfoBtn = document.getElementById('add-info-button');
+    if (addInfoBtn) {
+        addInfoBtn.addEventListener('click', addNewInformation);
+    }
+    
     document.getElementById('close-records-modal').addEventListener('click', hideRecordsModal);
     
     // تهيئة أزرار التبويبات
@@ -1276,4 +1282,19 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
         this.closePath();
         return this;
     };
+}
+
+// وظيفة لإضافة معلومات جديدة
+function addNewInformation() {
+    // إعادة تعيين النموذج للسماح بإدخال معلومات جديدة
+    resetForm();
+    
+    // التبديل إلى تبويب إدخال البيانات إذا كنا في تبويب آخر
+    const dataEntryTab = document.querySelector('.tab-btn[data-tab="data-entry"]');
+    if (dataEntryTab) {
+        dataEntryTab.click();
+    }
+    
+    // التمرير إلى أعلى الصفحة
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
