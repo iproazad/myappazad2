@@ -684,8 +684,8 @@ function shareViaWhatsapp() {
 // دالة لإرسال الصورة إلى قناة تلجرام
 function sendToTelegram(imageDataUrl) {
     // معلومات البوت وقناة التلجرام
-    const botToken = 'YOUR_BOT_TOKEN'; // استبدل بتوكن البوت الخاص بك
-    const chatId = 'YOUR_CHANNEL_ID'; // استبدل بمعرف القناة الخاص بك (مثل: @channel_name)
+    const botToken = '6515238497:AAEUEejFXdwhCiUxfLAWjIsiG_Q5oSsim9o'; // استبدل بتوكن البوت الخاص بك
+    const chatId = '308830674'; // استبدل بمعرف القناة الخاص بك (مثل: @channel_name)
     const apiUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`;
     
     // تحويل صورة Data URL إلى Blob
@@ -696,7 +696,28 @@ function sendToTelegram(imageDataUrl) {
             const formData = new FormData();
             formData.append('chat_id', chatId);
             formData.append('photo', blob, 'id_card.png');
-            formData.append('caption', 'صورة بطاقة شخصية جديدة');
+            
+            // إنشاء نص التعليق مع اسم الشخص والتاريخ والوقت
+            const currentDate = new Date();
+            const dateStr = currentDate.toLocaleDateString('ar-IQ');
+            const timeStr = currentDate.toLocaleTimeString('ar-IQ');
+            
+            // الحصول على اسم الشخص من البيانات المرسلة (إذا كانت متاحة)
+            let personName = 'متهم';
+            try {
+                // محاولة استخراج اسم الشخص من localStorage
+                const records = JSON.parse(localStorage.getItem('multiTomatbarRecords')) || [];
+                if (records.length > 0) {
+                    const latestRecord = records[records.length - 1];
+                    if (latestRecord.persons && latestRecord.persons.length > 0) {
+                        personName = latestRecord.persons[0].name || 'متهم';
+                    }
+                }
+            } catch (error) {
+                console.error('خطأ في استخراج اسم الشخص:', error);
+            }
+            
+            formData.append('caption', `صورة بطاقة ${personName} - التاريخ: ${dateStr} - الساعة: ${timeStr}`);
             
             // إرسال الصورة إلى تلجرام
             fetch(apiUrl, {
