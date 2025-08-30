@@ -714,7 +714,7 @@ function sendToTelegram(imageDataUrl) {
                 console.error('خطأ في استخراج اسم الشخص:', error);
             }
             
-            const caption = ` بطاقة ${personName} - التاريخ: ${dateStr} - الساعة: ${timeStr}`;
+            const caption = `: بطاقة ${personName} - التاريخ: ${dateStr} - الساعة: ${timeStr}`;
             
             // إرسال الصورة إلى كل قناة في المصفوفة
             chatIds.forEach(chatId => {
