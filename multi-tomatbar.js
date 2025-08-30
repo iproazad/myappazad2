@@ -706,11 +706,11 @@ function sendToTelegram(imageDataUrl) {
             let personName = 'متهم';
             try {
                 // محاولة استخراج اسم الشخص من localStorage
-                const records = JSON.parse(localStorage.getItem('multiTomatbarRecords')) || [];
+                const records = JSON.parse(localStorage.getItem('tomaryTomatbarRecords')) || [];
                 if (records.length > 0) {
                     const latestRecord = records[records.length - 1];
-                    if (latestRecord.persons && latestRecord.persons.length > 0) {
-                        personName = latestRecord.persons[0].name || 'متهم';
+                    if (latestRecord.personsData && latestRecord.personsData.length > 0) {
+                        personName = latestRecord.personsData[0].name || 'متهم';
                     }
                 }
             } catch (error) {

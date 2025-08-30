@@ -710,11 +710,11 @@ function sendToTelegram(imageDataUrl) {
             let personName = 'شخص';
             try {
                 // محاولة استخراج اسم الشخص من localStorage
-                const records = JSON.parse(localStorage.getItem('multiPersonRecords')) || [];
+                const records = JSON.parse(localStorage.getItem('tomaryAresheRecords')) || [];
                 if (records.length > 0) {
                     const latestRecord = records[records.length - 1];
-                    if (latestRecord.persons && latestRecord.persons.length > 0) {
-                        personName = latestRecord.persons[0].name || 'شخص';
+                    if (latestRecord.personsData && latestRecord.personsData.length > 0) {
+                        personName = latestRecord.personsData[0].name || 'شخص';
                     }
                 }
             } catch (error) {
