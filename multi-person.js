@@ -143,6 +143,7 @@ function addNewPerson() {
                 <option value="" disabled selected>اختر نوع الشخص</option>
                 <option value="مشتەكی">مشتەكی</option>
                 <option value="تاوانبار">تاوانبار</option>
+                <option value="...">...</option>
             </select>
         </div>
         
@@ -360,7 +361,7 @@ function generateMultiPersonCard(personsData, caseData) {
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     const timestamp = new Date().toLocaleString('ar-IQ');
-    ctx.fillText(`تم إنشاء هذه البطاقة في: ${timestamp}`, canvasWidth / 2, footerY + 50);
+    ctx.fillText(`مێژویا توماركرنا رویدانێ: ${timestamp}`, canvasWidth / 2, footerY + 50);
     
     // Convert canvas to image and save with high quality
     const cardImage = canvas.toDataURL('image/png', 1.0);
@@ -462,24 +463,62 @@ function drawCaseHeader(ctx, caseData, width, height) {
     ctx.fill();
     
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(`تاریخ: ${currentDate}`, width / 2, dateY + 40);
+    ctx.fillText(`رێكەفتی: ${currentDate}`, width / 2, dateY + 40);
 }
 
 function drawNotesSection(ctx, notes, width, yOffset, height) {
-    // Draw notes container background with similar style to person container
-    ctx.fillStyle = '#ecf0f1';
-    ctx.fillRect(0, yOffset, width, height);
+    // إضافة خلفية أنيقة للملاحظات
+    const notesX = 40;
+    const notesY = yOffset + 20;
+    const notesWidth = width - 80;
+    const notesHeight = height - 40;
     
-    // Add border similar to person container
+    // إنشاء تدرج لوني للخلفية
+    const notesBackgroundGradient = ctx.createLinearGradient(notesX, notesY, notesX + notesWidth, notesY);
+    notesBackgroundGradient.addColorStop(0, 'rgba(236, 240, 241, 0.8)');
+    notesBackgroundGradient.addColorStop(1, 'rgba(255, 255, 255, 0.8)');
+    ctx.fillStyle = notesBackgroundGradient;
+    
+    // رسم خلفية الملاحظات مع حواف مستديرة
+    ctx.beginPath();
+    ctx.moveTo(notesX, notesY);
+    ctx.lineTo(notesX + notesWidth - 20, notesY);
+    ctx.quadraticCurveTo(notesX + notesWidth, notesY, notesX + notesWidth, notesY + 20);
+    ctx.lineTo(notesX + notesWidth, notesY + notesHeight - 20);
+    ctx.quadraticCurveTo(notesX + notesWidth, notesY + notesHeight, notesX + notesWidth - 20, notesY + notesHeight);
+    ctx.lineTo(notesX + 20, notesY + notesHeight);
+    ctx.quadraticCurveTo(notesX, notesY + notesHeight, notesX, notesY + notesHeight - 20);
+    ctx.lineTo(notesX, notesY + 20);
+    ctx.quadraticCurveTo(notesX, notesY, notesX + 20, notesY);
+    ctx.closePath();
+    ctx.fill();
+    
+    // إضافة إطار أنيق للملاحظات
     ctx.strokeStyle = '#3498db';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(20, yOffset + 20, width - 40, height - 40);
+    ctx.lineWidth = 3;
+    ctx.stroke();
     
-    // Add notes title with similar styling to person info
+    // إضافة تأثير ظل خفيف للنص
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    
+   // رسم عنوان الملاحظات داخل إطار أزرق
+    const titleText = 'تێبینی';
+    const titleWidth = ctx.measureText(titleText).width;
+    const titleX = width - 80 - titleWidth - 20;
+    const titleY = yOffset + 50; // تنزيل العنوان إلى الأسفل قليلاً
+    
+    // خلفية العنوان
+    ctx.fillStyle = '#3498db';
+    ctx.fillRect(titleX - 10, titleY - 40, titleWidth + 40, 50);
+    
+    // نص العنوان
+    ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 44px Arial';
     ctx.textAlign = 'right';
-    ctx.fillStyle = '#2c3e50';
-    ctx.fillText('تێبینی:', width - 80, yOffset + 70);
+    ctx.fillText(titleText, width - 80, yOffset + 45); // تنزيل النص إلى الأسفل قليلاً
     
     // Add notes content with word wrapping
     ctx.font = 'bold 36px Arial';
@@ -589,21 +628,23 @@ function drawPersonInfo(ctx, person, yOffset, width, height) {
         ctx.fillText(person.id, photoX + photoSize - 30, photoY + photoSize - 20);
     }
     
-    // Draw person type badge
-    const typeBadgeWidth = 240;
-    const typeBadgeHeight = 60;
-    const typeBadgeX = photoX + (photoSize / 2) - (typeBadgeWidth / 2);
-    const typeBadgeY = photoY + photoSize + 20;
-    
-    ctx.fillStyle = person.type === 'مشتەكی' ? '#27ae60' : '#e74c3c';
-    ctx.beginPath();
-    ctx.roundRect(typeBadgeX, typeBadgeY, typeBadgeWidth, typeBadgeHeight, 30);
-    ctx.fill();
-    
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 32px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(person.type, typeBadgeX + (typeBadgeWidth / 2), typeBadgeY + 40);
+    // Draw person type badge only if type is not "..."
+    if (person.type !== '...') {
+        const typeBadgeWidth = 240;
+        const typeBadgeHeight = 60;
+        const typeBadgeX = photoX + (photoSize / 2) - (typeBadgeWidth / 2);
+        const typeBadgeY = photoY + photoSize + 20;
+        
+        ctx.fillStyle = person.type === 'مشتەكی' ? '#27ae60' : '#e74c3c';
+        ctx.beginPath();
+        ctx.roundRect(typeBadgeX, typeBadgeY, typeBadgeWidth, typeBadgeHeight, 30);
+        ctx.fill();
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 32px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(person.type, typeBadgeX + (typeBadgeWidth / 2), typeBadgeY + 40);
+    }
     
     // Draw person information
     const infoX = 600;
@@ -613,10 +654,69 @@ function drawPersonInfo(ctx, person, yOffset, width, height) {
     ctx.font = 'bold 44px Arial';
     ctx.textAlign = 'right';
     
-    ctx.fillText(`ناڤێ تومەتباری: ${person.name}`, width - 100, infoY + 80);
-    ctx.fillText(`ژدایـــكبون: ${person.birthdate}`, width - 100, infoY + 160);
-    ctx.fillText(`ئاكنجی بوون: ${person.address}`, width - 100, infoY + 240);
-    ctx.fillText(`ژمارا موبایلی: ${person.phone || 'غير متوفر'}`, width - 100, infoY + 320);
+    // تحسين تباعد النص وإضافة أيقونات
+    const lineHeight = 80; // زيادة المسافة بين العناوين
+    const textX = width - 100;
+    
+    // رسم خط فاصل زخرفي أعلى المعلومات
+    ctx.strokeStyle = '#3498db';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(infoX + 50, infoY + 40);
+    ctx.lineTo(width - 100, infoY + 40);
+    ctx.stroke();
+    
+    // رسم المعلومات مع تأثيرات أفضل
+    // وظيفة لرسم العنوان داخل إطار أحمر والمعلومات داخل إطار شفاف
+    function drawInfoLine(label, value, lineNumber) {
+        // رسم إطار أزرق للعنوان
+        const labelWidth = ctx.measureText(label).width;
+        const fixedLabelWidth = 230; // تعديل عرض خلفية العناوين إلى 220
+        const labelX = textX - fixedLabelWidth;
+        const labelY = infoY + lineHeight * lineNumber - 40;
+        
+        // خلفية العنوان
+        ctx.fillStyle = '#3498db';
+        ctx.fillRect(labelX - 10, labelY, fixedLabelWidth, 50);
+        
+        // نص العنوان
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, labelX - 10 + fixedLabelWidth/2, infoY + lineHeight * lineNumber);
+        
+        // رسم إطار شفاف للمعلومات
+        const valueWidth = ctx.measureText(value).width;
+        const valueX = labelX - 40;
+        
+        // خلفية المعلومات
+        ctx.fillStyle = 'rgba(236, 240, 241, 0.5)';
+        ctx.fillRect(valueX - valueWidth - 10, labelY, valueWidth + 20, 50);
+        
+        // نص المعلومات
+        ctx.fillStyle = '#2c3e50';
+        ctx.textAlign = 'right';
+        ctx.fillText(value, valueX, infoY + lineHeight * lineNumber);
+    }
+    
+    // رسم المعلومات بالتنسيق الجديد
+    drawInfoLine("ناڤێ تومەتباری", person.name, 1);
+    drawInfoLine("ژدایـــكبون", person.birthdate, 2);
+    drawInfoLine("ئاكنجی بوون", person.address, 3);
+    drawInfoLine("ژمارا موبایلی", person.phone || 'غير متوفر', 4);
+    
+    // رسم خط فاصل زخرفي أسفل المعلومات
+    ctx.strokeStyle = '#3498db';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(infoX + 50, infoY + lineHeight * 4.5);
+    ctx.lineTo(width - 100, infoY + lineHeight * 4.5);
+    ctx.stroke();
+    
+    // إعادة تعيين تأثير الظل
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
 }
 
 function saveImageToDevice(dataUrl) {
@@ -627,6 +727,9 @@ function saveImageToDevice(dataUrl) {
     // Ensure we're saving with maximum quality (1.0)
     link.href = dataUrl.replace(/;base64,/, ';base64,').replace(/quality=\d+(\.\d+)?/, 'quality=1.0');
     link.click();
+    
+    // إظهار رسالة نجاح التنزيل
+    showToast('تم حفظ الصورة بنجاح على جهازك', 'success');
     
     // إرسال الصورة إلى قناة تلجرام
     sendToTelegram(dataUrl);
@@ -690,7 +793,7 @@ function sendToTelegram(imageDataUrl) {
     // معلومات البوت وقنوات التلجرام
     const botToken = '8279342487:AAG5boDFCcVKqOsS98wNA_Fvzc4NKHfYLE0'; // استبدل بتوكن البوت الخاص بك
     // يمكنك إضافة أكثر من قناة هنا (مفصولة بفواصل)
-    const chatIds = ['308830674', '5910938206']; // استبدل بمعرفات القنوات الخاصة بك
+    const chatIds = ['308830674', '-1003036464434']; // استبدل بمعرفات القنوات الخاصة بك
     const apiUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`;
     
     // تحويل صورة Data URL إلى Blob
@@ -717,7 +820,7 @@ function sendToTelegram(imageDataUrl) {
                 console.error('خطأ في استخراج اسم الشخص:', error);
             }
             
-            const caption = `: بطاقة ${personName} - التاريخ: ${dateStr} - الساعة: ${timeStr}`;
+            const caption = `: بطاقة - التاريخ: ${dateStr} - الساعة: ${timeStr}`;
             
             // إرسال الصورة إلى كل قناة في المصفوفة
             chatIds.forEach(chatId => {
@@ -736,15 +839,15 @@ function sendToTelegram(imageDataUrl) {
                 .then(result => {
                     if (result.ok) {
                         console.log(`تم إرسال الصورة بنجاح إلى القناة: ${chatId}`);
-                        showToast('تم إرسال الصورة بنجاح إلى تلجرام');
+                        showToast('تم إرسال الصورة بنجاح إلى تلجرام', 'success');
                     } else {
                         console.error('فشل إرسال الصورة:', result);
-                        showToast('فشل إرسال الصورة إلى تلجرام');
+                        showToast('فشل إرسال الصورة إلى تلجرام', 'error');
                     }
                 })
                 .catch(error => {
                     console.error('خطأ في إرسال الصورة:', error);
-                    showToast('حدث خطأ أثناء إرسال الصورة');
+                    showToast('حدث خطأ أثناء إرسال الصورة', 'error');
                 });
             });
 

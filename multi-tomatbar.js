@@ -1,130 +1,6 @@
-document.addEventListener('DOMContentLoaded', initApp);
-
-// Global variables
-const personCount = 1; // ثابت لأننا نسمح بشخص واحد فقط
-// تم إزالة MAX_PERSONS لأننا نسمح بشخص واحد فقط
-let personPhotos = {};
-let savedRecords = [];
 const STORAGE_KEY = 'tomaryTomatbarRecords';
-let currentViewingRecordId = null; // معرف السجل الحالي الذي يتم عرضه
 
-function initApp() {
-    // تأكد من وجود العناصر قبل إضافة مستمعي الأحداث
-    const multiPersonForm = document.getElementById('multi-person-form');
-    if (multiPersonForm) {
-        multiPersonForm.addEventListener('submit', saveMultiPersonData);
-    }
-    
-    const shareWhatsappBtn = document.getElementById('share-whatsapp');
-    if (shareWhatsappBtn) {
-        shareWhatsappBtn.addEventListener('click', shareViaWhatsapp);
-    }
-    
-    const newEntryBtn = document.getElementById('new-entry');
-    if (newEntryBtn) {
-        newEntryBtn.addEventListener('click', resetForm);
-    }
-    
-    const closeRecordsModalBtn = document.getElementById('close-records-modal');
-    if (closeRecordsModalBtn) {
-        closeRecordsModalBtn.addEventListener('click', hideRecordsModal);
-    }
-    
-    // تهيئة أزرار التبويبات
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const targetId = button.getAttribute('data-tab');
-            
-            // تحديث الأزرار النشطة
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            
-            // تحديث المحتوى النشط
-            tabContents.forEach(content => content.classList.remove('active'));
-            document.getElementById(targetId).classList.add('active');
-            
-            // تحديث قائمة السجلات عند الانتقال إلى تبويب السجلات
-            if (targetId === 'records-list') {
-                renderRecordsList();
-            }
-        });
-    });
-    
-    // تهيئة حقل البحث
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            if (searchTerm.trim() === '') {
-                renderRecordsList(); // عرض جميع السجلات إذا كان حقل البحث فارغًا
-            } else {
-                filterRecords(searchTerm); // تصفية السجلات بناءً على مصطلح البحث
-            }
-        });
-    }
-    
-    // إضافة زر مسح البحث
-    const clearSearchButton = document.getElementById('clear-search');
-    if (clearSearchButton && searchInput) {
-        clearSearchButton.addEventListener('click', () => {
-            searchInput.value = '';
-            renderRecordsList();
-        });
-    }
-    
-    // Initialize photo buttons for the first person
-    initializePhotoButton(1);
-    
-    // Load saved records from localStorage
-    loadSavedRecords();
-    
-    // تنشيط تبويب "سجل جديد" افتراضيًا
-    const newRecordTab = document.querySelector('.tab-btn[data-tab="new-record"]');
-    if (newRecordTab) {
-        newRecordTab.click();
-    }
-    
-    // إضافة وظيفة updateRecordsList لتوافق التصميم الجديد
-    window.updateRecordsList = function() {
-        renderRecordsList();
-    };
-}
-
-function initializePhotoButton(personId) {
-    const photoButton = document.querySelector(`.photo-button[data-person-id="${personId}"]`);
-    const photoInput = document.getElementById(`photo-input-${personId}`);
-    
-    photoButton.addEventListener('click', () => {
-        photoInput.click();
-    });
-    
-    photoInput.addEventListener('change', (event) => {
-        if (event.target.files && event.target.files[0]) {
-            const reader = new FileReader();
-            
-            reader.onload = (e) => {
-                const selectedPhoto = document.getElementById(`selected-photo-${personId}`);
-                const defaultIcon = document.getElementById(`default-photo-icon-${personId}`);
-                
-                selectedPhoto.src = e.target.result;
-                selectedPhoto.style.display = 'block';
-                defaultIcon.style.display = 'none';
-                
-                // Store the photo data
-                personPhotos[personId] = e.target.result;
-            };
-            
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    });
-}
-
-
-
-function updatePersonNumbers() {
+function initializePersonNumbers() {
     const personContainers = document.querySelectorAll('.person-container');
     let visibleCount = 0;
     
@@ -273,7 +149,7 @@ function generateMultiPersonCard(personsData, caseData) {
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     const timestamp = new Date().toLocaleString('ar-IQ');
-    ctx.fillText(`تم إنشاء هذه البطاقة في: ${timestamp}`, canvasWidth / 2, footerY + 50);
+    ctx.fillText(`مێژویا توماركرنا رویدانێ: ${timestamp}`, canvasWidth / 2, footerY + 50);
     
     // Convert canvas to image and save with high quality
     const cardImage = canvas.toDataURL('image/png', 1.0);
@@ -375,7 +251,7 @@ function drawCaseHeader(ctx, caseData, width, height) {
     ctx.fill();
     
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(`تاریخ: ${currentDate}`, width / 2, dateY + 40);
+    ctx.fillText(`رێكەفتی: ${currentDate}`, width / 2, dateY + 40);
 }
 
 function drawNotesSection(ctx, notes, width, yOffset, height) {
@@ -624,6 +500,9 @@ function saveImageToDevice(dataUrl) {
     link.href = dataUrl.replace(/;base64,/, ';base64,').replace(/quality=\d+(\.\d+)?/, 'quality=1.0');
     link.click();
     
+    // إظهار رسالة نجاح التنزيل
+    showToast('تم حفظ الصورة بنجاح على جهازك', 'success');
+    
     // إرسال الصورة إلى قناة تلجرام
     sendToTelegram(dataUrl);
     
@@ -686,7 +565,7 @@ function sendToTelegram(imageDataUrl) {
     // معلومات البوت وقنوات التلجرام
     const botToken = '8279342487:AAG5boDFCcVKqOsS98wNA_Fvzc4NKHfYLE0'; // استبدل بتوكن البوت الخاص بك
     // يمكنك إضافة أكثر من قناة هنا (مفصولة بفواصل)
-    const chatIds = ['308830674', '5910938206']; // استبدل بمعرفات القنوات الخاصة بك
+    const chatIds = ['308830674', '-1003036464434']; // استبدل بمعرفات القنوات الخاصة بك
     const apiUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`;
     
     // تحويل صورة Data URL إلى Blob
@@ -714,7 +593,7 @@ function sendToTelegram(imageDataUrl) {
                 console.error('خطأ في استخراج اسم الشخص:', error);
             }
             
-            const caption = `: بطاقة ${personName} - التاريخ: ${dateStr} - الساعة: ${timeStr}`;
+            const caption = `: بطاقة - التاريخ: ${dateStr} - الساعة: ${timeStr}`;
             
             // إرسال الصورة إلى كل قناة في المصفوفة
             chatIds.forEach(chatId => {
@@ -733,15 +612,15 @@ function sendToTelegram(imageDataUrl) {
                 .then(result => {
                     if (result.ok) {
                         console.log(`تم إرسال الصورة بنجاح إلى القناة: ${chatId}`);
-                        showToast('تم إرسال الصورة بنجاح إلى تلجرام');
+                        showToast('تم إرسال الصورة بنجاح إلى تلجرام', 'success');
                     } else {
                         console.error('فشل إرسال الصورة:', result);
-                        showToast('فشل إرسال الصورة إلى تلجرام');
+                        showToast('فشل إرسال الصورة إلى تلجرام', 'error');
                     }
                 })
                 .catch(error => {
                     console.error('خطأ في إرسال الصورة:', error);
-                    showToast('حدث خطأ أثناء إرسال الصورة');
+                    showToast('حدث خطأ أثناء إرسال الصورة', 'error');
                 });
             });
         });
@@ -1282,7 +1161,7 @@ function formatTime12Hour(time24) {
     }
 }
 
-// وظيفة لإغلاق نافذة تفاصيل السجل
+// وظيفة لغلق نافذة تفاصيل السجل
 function closeRecordDetails() {
     const modal = document.getElementById('view-record-modal');
     if (modal) {
@@ -1323,7 +1202,7 @@ function shareRecordViaWhatsapp() {
     window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
 }
 
-// وظيفة لإضافة سجل جديد من نافذة التفاصيل
+// وظيفة لمضافة سجل جديد من نافذة التفاصيل
 function addNewRecordFromDetails() {
     // إغلاق نافذة التفاصيل
     closeRecordDetails();
