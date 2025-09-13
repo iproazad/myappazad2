@@ -1,25 +1,32 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>نظام إدارة الحالات</title>
+    <title>نظام تسجيل الحالات</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Google Fonts for better Arabic support -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet">
     <style>
-      body {
-        font-family: 'Cairo', sans-serif;
-      }
-      .searchable-select-menu {
-        max-height: 15rem; /* 240px */
-        overflow-y: auto;
-      }
+        body {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+        }
+        /* Fix for searchable select menu in RTL */
+        .searchable-select-menu {
+            right: 0;
+            left: auto;
+        }
     </style>
-  <script type="importmap">
+    <!-- Dependencies -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script type="importmap">
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.1.1",
@@ -28,14 +35,11 @@
   }
 }
 </script>
-    <!-- Add Babel Standalone for in-browser transpilation -->
-    <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
 <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-gray-100 dark:bg-gray-900">
+<body>
     <div id="root"></div>
-    <!-- Tell Babel to transpile this script with React and TypeScript presets -->
-    <script type="text/babel" data-presets="react,typescript" data-type="module" src="./index.tsx"></script>
-  <script type="module" src="/index.tsx"></script>
+    <script type="text/babel" data-type="module" src="./index.tsx"></script>
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>
