@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import type { Record, Person, CaseDetails } from '../types.ts';
 import { PersonInputGroup } from './PersonInputGroup.tsx';
@@ -103,9 +102,9 @@ export const MultiPersonForm: React.FC<MultiPersonFormProps> = ({ onSave }) => {
     };
     
     return (
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg space-y-8">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-lg space-y-8">
             <div>
-                <h2 className="text-2xl font-bold mb-4 border-b pb-2 border-gray-300 dark:border-gray-600">الأشخاص في البلاغ</h2>
+                <h2 className="text-2xl font-bold mb-6 border-b pb-3 border-gray-300 dark:border-gray-600">الأشخاص في البلاغ</h2>
                 <div className="space-y-6">
                     {persons.map((person, index) => (
                         <PersonInputGroup
@@ -120,14 +119,14 @@ export const MultiPersonForm: React.FC<MultiPersonFormProps> = ({ onSave }) => {
                 <button
                     type="button"
                     onClick={addNewPerson}
-                    className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                    className="mt-6 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
                 >
                     + إضافة شخص
                 </button>
             </div>
 
             <div>
-                <h2 className="text-2xl font-bold mb-4 border-b pb-2 border-gray-300 dark:border-gray-600">تفاصيل البلاغ</h2>
+                <h2 className="text-2xl font-bold mb-6 border-b pb-3 border-gray-300 dark:border-gray-600">تفاصيل البلاغ</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <SearchableSelect label="نوع المشكلة" options={PROBLEM_TYPES} selected={caseDetails.issueType} onSelect={(val) => handleCaseDetailsChange('issueType', val)} isRequired={true} />
                     <SearchableSelect label="الفترة" options={PERIODS} selected={caseDetails.period} onSelect={(val) => handleCaseDetailsChange('period', val)} />
@@ -137,30 +136,30 @@ export const MultiPersonForm: React.FC<MultiPersonFormProps> = ({ onSave }) => {
                     
                     <div>
                         <label htmlFor="problemLocation" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">مكان المشكلة</label>
-                        <input type="text" id="problemLocation" value={caseDetails.problemLocation} onChange={(e) => handleCaseDetailsChange('problemLocation', e.target.value)} className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
+                        <input type="text" id="problemLocation" value={caseDetails.problemLocation} onChange={(e) => handleCaseDetailsChange('problemLocation', e.target.value)} className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500" />
                     </div>
 
                     <div>
                         <label htmlFor="timeFrom" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">وقت من</label>
-                        <input type="time" id="timeFrom" value={caseDetails.timeFrom} onChange={(e) => handleCaseDetailsChange('timeFrom', e.target.value)} className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
+                        <input type="time" id="timeFrom" value={caseDetails.timeFrom} onChange={(e) => handleCaseDetailsChange('timeFrom', e.target.value)} className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500" />
                     </div>
                      <div>
                         <label htmlFor="timeTo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">وقت إلى</label>
-                        <input type="time" id="timeTo" value={caseDetails.timeTo} onChange={(e) => handleCaseDetailsChange('timeTo', e.target.value)} className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
+                        <input type="time" id="timeTo" value={caseDetails.timeTo} onChange={(e) => handleCaseDetailsChange('timeTo', e.target.value)} className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500" />
                     </div>
                     
                     <div className="md:col-span-2 lg:col-span-3">
                         <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ملاحظات</label>
-                        <textarea id="notes" value={caseDetails.notes} onChange={(e) => handleCaseDetailsChange('notes', e.target.value)} rows={4} className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        <textarea id="notes" value={caseDetails.notes} onChange={(e) => handleCaseDetailsChange('notes', e.target.value)} rows={4} className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500"></textarea>
                     </div>
                 </div>
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
                 <button
                     type="submit"
                     disabled={isSaving}
-                    className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed"
+                    className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed"
                 >
                     {isSaving ? 'جاري الحفظ...' : 'حفظ السجل'}
                 </button>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MultiPersonForm } from './components/MultiPersonForm.tsx';
 import { RecordList } from './components/RecordList.tsx';
@@ -53,8 +52,9 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-            <header className="bg-white dark:bg-gray-800 shadow-md">
+        <div className="min-h-screen text-gray-800 dark:text-gray-200">
+            {/* Top Header for larger screens */}
+            <header className="hidden md:block bg-white dark:bg-gray-800 shadow-md">
                 <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
                     <h1 className="text-xl font-bold text-gray-800 dark:text-white">نظام تسجيل الحالات</h1>
                     <div className="flex items-center space-x-4">
@@ -73,13 +73,41 @@ const App: React.FC = () => {
                     </div>
                 </nav>
             </header>
+
+            {/* Main Content */}
             <main className="container mx-auto p-4 md:p-6">
+                 <div className="md:hidden text-center mb-4">
+                     <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+                        {view === 'form' ? 'نموذج جديد' : 'قائمة السجلات'}
+                     </h1>
+                 </div>
                 {view === 'form' ? (
                     <MultiPersonForm onSave={handleAddRecord} />
                 ) : (
                     <RecordList records={records} onView={handleViewRecord} onDelete={handleDeleteRecord} />
                 )}
             </main>
+
+            {/* Bottom Navigation for mobile */}
+            <footer className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-[0_-2px_5px_rgba(0,0,0,0.1)] z-10">
+                <nav className="flex justify-around items-center h-16">
+                    <button
+                        onClick={() => setView('form')}
+                        className={`flex flex-col items-center justify-center w-full transition-colors duration-200 ${view === 'form' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span className="text-xs font-medium mt-1">نموذج جديد</span>
+                    </button>
+                    <button
+                        onClick={() => setView('list')}
+                        className={`flex flex-col items-center justify-center w-full transition-colors duration-200 ${view === 'list' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                        <span className="text-xs font-medium mt-1">السجلات</span>
+                    </button>
+                </nav>
+            </footer>
+
             {selectedRecord && <ViewRecordModal record={selectedRecord} onClose={handleCloseModal} />}
         </div>
     );
