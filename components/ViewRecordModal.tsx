@@ -1,6 +1,6 @@
 
 import React from 'react';
-import type { Record } from '../types';
+import type { Record } from '../types.ts';
 
 interface ViewRecordModalProps {
     record: Record;

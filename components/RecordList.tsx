@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
-import type { Record } from '../types';
-import { RecordCard } from './RecordCard';
+import type { Record } from '../types.ts';
+import { RecordCard } from './RecordCard.tsx';
 
 interface RecordListProps {
     records: Record[];

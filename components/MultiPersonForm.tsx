@@ -1,16 +1,16 @@
 
 import React, { useState, useRef } from 'react';
-import type { Record, Person, CaseDetails } from '../types';
-import { PersonInputGroup } from './PersonInputGroup';
-import { SearchableSelect } from './SearchableSelect';
+import type { Record, Person, CaseDetails } from '../types.ts';
+import { PersonInputGroup } from './PersonInputGroup.tsx';
+import { SearchableSelect } from './SearchableSelect.tsx';
 import { 
     PERIODS, 
     DRIVERS, 
     POINTS, 
     SENT_TO_OPTIONS, 
     PROBLEM_TYPES 
-} from '../constants';
-import { generateCardImage } from '../services/cardGenerator';
+} from '../constants.ts';
+import { generateCardImage } from '../services/cardGenerator.ts';
 
 interface MultiPersonFormProps {
     onSave: (record: Record) => void;

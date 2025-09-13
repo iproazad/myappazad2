@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { MultiPersonForm } from './components/MultiPersonForm';
-import { RecordList } from './components/RecordList';
-import type { Record } from './types';
-import { ViewRecordModal } from './components/ViewRecordModal';
+import { MultiPersonForm } from './components/MultiPersonForm.tsx';
+import { RecordList } from './components/RecordList.tsx';
+import type { Record } from './types.ts';
+import { ViewRecordModal } from './components/ViewRecordModal.tsx';
 
 const App: React.FC = () => {
     const [view, setView] = useState<'form' | 'list'>('form');

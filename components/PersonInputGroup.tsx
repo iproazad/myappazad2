@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import type { Person } from '../types';
-import { SearchableSelect } from './SearchableSelect';
-import { PERSON_TYPES, MARITAL_STATUSES, IMPRISONMENT_OPTIONS } from '../constants';
+import type { Person } from '../types.ts';
+import { SearchableSelect } from './SearchableSelect.tsx';
+import { PERSON_TYPES, MARITAL_STATUSES, IMPRISONMENT_OPTIONS } from '../constants.ts';
 
 interface PersonInputGroupProps {
     person: Person;
