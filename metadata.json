@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Suspect Registration App",
+  "description": "An application to register and manage suspect information, including personal details, incident reports, and photos. Allows for saving, viewing, sharing, and downloading records.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
