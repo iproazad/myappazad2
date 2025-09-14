@@ -1,5 +1,0 @@
-{
-  "name": "Copy of Case Management System",
-  "description": "A modern web application for recording and managing case files, supporting multiple individuals per record, image uploads, and generating shareable summary cards. Built with React and Tailwind CSS for a clean, responsive, and RTL-friendly user experience.",
-  "requestFramePermissions": []
-}
