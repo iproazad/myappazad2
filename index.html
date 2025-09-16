@@ -1,130 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8">
-  <title>توماركرنا تومەتباری</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🛡️%3C/text%3E%3C/svg%3E">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e293b">
-<link rel="stylesheet" href="/index.css">
-</head>
-<body class="bg-slate-900">
-  <div class="app-container min-h-screen bg-slate-900 text-gray-200">
-    <header class="app-header bg-slate-800/80 backdrop-blur-sm text-white p-4 flex items-center justify-between shadow-lg sticky top-0 z-10 border-b border-slate-700">
-        <div class="flex items-center gap-3">
-            <i class="fas fa-shield-halved text-2xl text-blue-400"></i>
-            <h1 class="text-xl font-bold">توماركرنا تومەتباری</h1>
-        </div>
-        <div class="header-actions">
-            <button id="install-pwa-button" title="Install App" class="install-btn bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:bg-blue-600 transition hidden">
-                <i class="fas fa-download"></i>
-            </button>
-        </div>
-    </header>
-
-    <main class="app-content p-4">
-        <div class="tab-container max-w-4xl mx-auto">
-            <div class="tab-buttons flex p-1 bg-slate-800 rounded-xl shadow-sm mb-6">
-                <button data-tab="new-record" class="tab-btn flex-1 py-2 px-4 font-bold rounded-lg transition-all duration-300 ease-in-out bg-blue-600 text-white shadow-md">
-                    سجل جديد
-                </button>
-                <button data-tab="records-list" class="tab-btn flex-1 py-2 px-4 font-bold rounded-lg transition-all duration-300 ease-in-out text-gray-400 hover:bg-slate-700">
-                    قائمة السجلات
-                </button>
-            </div>
-
-            <div id="new-record" class="tab-content">
-                <form id="suspect-form" class="space-y-6">
-                    <!-- Photo Section -->
-                    <div class="photo-section bg-slate-800 p-6 rounded-xl shadow-lg flex flex-col items-center border border-slate-700">
-                        <div class="photo-preview w-40 h-40 border-4 border-slate-600 rounded-full bg-slate-700 flex items-center justify-center mb-4 overflow-hidden ring-4 ring-slate-700/50">
-                            <i id="default-photo-icon" class="fas fa-user text-6xl text-slate-500"></i>
-                            <img id="photo-preview-img" alt="صورة المشتبه به" class="w-full h-full object-cover hidden">
-                        </div>
-                        <div class="photo-buttons flex gap-4">
-                            <button type="button" id="capture-btn" class="photo-btn bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-5 rounded-lg flex items-center transition shadow">
-                                <i class="fas fa-camera ml-2"></i> الكاميرا
-                            </button>
-                            <button type="button" id="upload-btn" class="photo-btn bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-5 rounded-lg flex items-center transition shadow">
-                                <i class="fas fa-images ml-2"></i> المعرض
-                            </button>
-                        </div>
-                        <input id="file-input" type="file" accept="image/*" class="hidden">
-                    </div>
-
-                    <!-- Personal Info -->
-                    <div class="form-section bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
-                      <h3 class="section-title text-xl font-bold text-gray-200 mb-5 border-b border-slate-700 pb-3 flex items-center"><i class="fas fa-user text-blue-400 ml-3"></i> زانیاری کەسی</h3>
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                          <div class="form-group"><label for="name" class="block text-sm font-medium text-gray-400 mb-1">ناڤێ تومەتباری</label><input type="text" id="name" name="name" required class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200"></div>
-                          <div class="form-group"><label for="birthdate" class="block text-sm font-medium text-gray-400 mb-1">ژدایـــكبون</label><input type="text" id="birthdate" name="birthdate" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200"></div>
-                          <div class="form-group"><label for="address" class="block text-sm font-medium text-gray-400 mb-1">ئاكنجی بوون</label><input type="text" id="address" name="address" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200"></div>
-                          <div class="form-group"><label for="problemType" class="block text-sm font-medium text-gray-400 mb-1">جورێ ئاریشێ</label><input list="problem-type-list" id="problemType" name="problemType" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200"><datalist id="problem-type-list"><option value="ئاریشا خێزانی"><option value="خازوك"><option value="شـــەر"><option value="سەرخوش"><option value="رویدانا ترومبێلێ"><option value="مخەدەر"><option value="دزی"><option value="بەرزەبون"><option value="ازعــاج"><option value="داخازكری"><option value="گومانلێكری"><option value="هەولا خوكوشتنێ"><option value="خوكوشتن"><option value="كوشتن"><option value="گیان ژدەستدان"><option value="بێ سەمیان"><option value="كێشانا سكوتینێ"><option value="فیلبازی تشقلە"><option value="ترومبيلا بي خودان"><option value="ئاگر بەربون"><option value="تەقەكرن"><option value="مەلەڤاني جهی قەدەغە"><option value="تێكدەر"><option value="خەندقin"><option value="گەفكرن"></datalist></div>
-                          <div class="form-group"><label for="maritalStatus" class="block text-sm font-medium text-gray-400 mb-1">بارێ خێزانی</label><input list="marital-status-list" id="maritalStatus" name="maritalStatus" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200"><datalist id="marital-status-list"><option value="خێزاندەرە"><option value="نە خێزاندارە"></datalist></div>
-                          <div class="form-group"><label for="job" class="block text-sm font-medium text-gray-400 mb-1">كارێ وی</label><input type="text" id="job" name="job" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200"></div>
-                          <div class="form-group"><label for="prison" class="block text-sm font-medium text-gray-400 mb-1">زیندانكرن</label><input list="prison-list" id="prison" name="prison" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200"><datalist id="prison-list"><option value="بەلی"><option value="نەخێر"></datalist></div>
-                          <div class="form-group"><label for="phone" class="block text-sm font-medium text-gray-400 mb-1">ژمارا موبایلي</label><input type="tel" id="phone" name="phone" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200"></div>
-                      </div>
-                    </div>
-                    <!-- Incident Info -->
-                    <div class="form-section bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
-                        <h3 class="section-title text-xl font-bold text-gray-200 mb-5 border-b border-slate-700 pb-3 flex items-center"><i class="fas fa-info-circle text-blue-400 ml-3"></i> توماركرنا پێزانینێن رویدانێ</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                            <div class="form-group"><label for="problemLocation" class="block text-sm font-medium text-gray-400 mb-1">جهێ ئاریشێ</label><input type="text" id="problemLocation" name="problemLocation" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200"></div>
-                            <div class="form-group"><label for="driverName" class="block text-sm font-medium text-gray-400 mb-1">ناڤێ شوفێری</label><input list="driver-name-list" id="driverName" name="driverName" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200"><datalist id="driver-name-list"><option value="سليمان علي حميد"><option value="نیچیرڤان عباس بشار"><option value="نعمان رمضان محمد"><option value="رضوان محمود محمد"><option value="داود قادر ندیر ناصر"><option value="سربست محمدعلی"><option value="حسن رؤوف حسن"><option value="ريزان سمو محمد"><option value="صابر شفیق شمزین"><option value="رضوان رمضان علی"><option value="سعید سربست رسول"><option value="نیجیرڤان احمد علی"><option value="دشتی عادل عثمان"><option value="ریبر سلمان عثمان"><option value="ازاد عدنان عبدالله"><option value="بیوار اسماعیل محمد"><option value="مهڤان تحسين پيراموس"><option value="فارس بكر رشید"></datalist></div>
-                            <div class="form-group"><label for="point" class="block text-sm font-medium text-gray-400 mb-1">خالا</label><input list="point-list" id="point" name="point" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200"><datalist id="point-list"><option value="101"><option value="102"><option value="103"><option value="104"><option value="105"><option value="106"><option value="107"><option value="108"><option value="109"><option value="110"><option value="111"><option value="112"></datalist></div>
-                            <div class="form-group"><label for="sentTo" class="block text-sm font-medium text-gray-400 mb-1">رەوانەكرن بـــو</label><input list="sent-to-list" id="sentTo" name="sentTo" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200"><datalist id="sent-to-list"><option value="بنگەهێ پولیسێن كارێز"><option value="بنگەهێ پولیسێن زاخو"><option value="بنگەهێ پولیسێن سێمالكا"><option value="بنگەهێ پولیسێن دەلال"><option value="بنگەهێ پولیسێن بێدارێ"><option value="بنگەهێ پولیسێن نیو زاخو"><option value="بنگەهێ پولیسێن رزگاری"><option value="рێڤەبەریا پولیسێن زاخو"><option value="توندوتیژیا زاخو"><option value="نەخوشخانا زاخو"><option value="دەستێ سەمیانا"><option value="مكافحا زاخو"><option value="مكافحا بێدارێ"><option value="ئاسايشا زاخو"><option value="ئاگرڤەمراندنا زاخو"><option value="گرتیخانا زاخو"><option value="هاتوچووا زاخو"></datalist></div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-                          <div class="form-group"><label for="timeFrom" class="block text-sm font-medium text-gray-400 mb-1">ژ کاتی</label><input type="time" id="timeFrom" name="timeFrom" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200" style="color-scheme: dark;"></div>
-                          <div class="form-group"><label for="timeTo" class="block text-sm font-medium text-gray-400 mb-1">بو کاتی</label><input type="time" id="timeTo" name="timeTo" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200" style="color-scheme: dark;"></div>
-                          <div class="form-group"><label for="period" class="block text-sm font-medium text-gray-400 mb-1">ماوە</label><input list="period-list" id="period" name="period" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-200"><datalist id="period-list"><option value="روژ"><option value="شەڤ"></datalist></div>
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-lg text-lg flex items-center justify-center">
-                      <i class="fas fa-save ml-2"></i> خەزنكرنا كارتێ
-                    </button>
-                </form>
-            </div>
-
-            <div id="records-list" class="tab-content hidden">
-                 <div class="records-list-container space-y-6">
-                    <div class="search-container relative">
-                      <i class="fas fa-search absolute top-1/2 left-4 -translate-y-1/2 text-gray-400"></i>
-                      <input 
-                        type="text" 
-                        id="search-input"
-                        placeholder="لێگەڕیان بە ناو، جۆری کێشە..." 
-                        class="w-full p-3 pl-12 bg-slate-800 border border-slate-700 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-200">
-                    </div>
-                  
-                    <div id="records-grid" class="records-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        <!-- Record cards will be inserted here -->
-                    </div>
-
-                    <div id="no-records-message" class="no-records text-center py-16 px-6 bg-slate-800 rounded-lg shadow-lg border border-slate-700 hidden">
-                        <i class="fas fa-file-alt text-5xl text-slate-600 mb-4"></i>
-                        <p class="text-slate-400 font-semibold">هیچ تۆمارێک نەدۆزرایەوە</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-  </div>
-
-  <!-- Modal for viewing a record card -->
-  <div id="record-modal" class="modal fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-    <div id="modal-content" class="modal-content relative w-full max-w-lg">
-        <!-- Card will be rendered here -->
-    </div>
-  </div>
-
-  <script src="app.js"></script>
-<script type="module" src="/index.tsx"></script>
-</body>
-</html>
