@@ -1,9 +1,9 @@
 import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import type { Suspect } from '../types.ts';
-import { useLocalStorage } from '../hooks/useLocalStorage.ts';
-import InputField from '../components/InputField.tsx';
-import Button from '../components/Button.tsx';
-import { CameraIcon, DownloadIcon, PrintIcon, SearchIcon } from '../components/Icons.tsx';
+import type { Suspect } from '../types';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import InputField from '../components/InputField';
+import Button from '../components/Button';
+import { CameraIcon, DownloadIcon, PrintIcon, SearchIcon } from '../components/Icons';
 
 const emptySuspect: Omit<Suspect, 'id' | 'date'> = {
     photo: null,

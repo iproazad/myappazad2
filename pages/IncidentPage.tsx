@@ -1,9 +1,9 @@
 import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import type { Incident, Person, CaseInfo } from '../types.ts';
-import { useLocalStorage } from '../hooks/useLocalStorage.ts';
-import InputField from '../components/InputField.tsx';
-import Button from '../components/Button.tsx';
-import { CameraIcon, DownloadIcon, PrintIcon, UserPlusIcon, TrashIcon, SearchIcon } from '../components/Icons.tsx';
+import type { Incident, Person, CaseInfo } from '../types';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import InputField from '../components/InputField';
+import Button from '../components/Button';
+import { CameraIcon, DownloadIcon, PrintIcon, UserPlusIcon, TrashIcon, SearchIcon } from '../components/Icons';
 
 const emptyCaseInfo: CaseInfo = {
     issueType: '',
@@ -17,7 +17,7 @@ const emptyCaseInfo: CaseInfo = {
 };
 
 // Datalist options from user's HTML
-const issueTypeOptions = ["ئاریشا خێزانی", "خازوك", "شـــەر", "سەرخوش", "رویدانا ترومبێلێ", "مخەدەر", "دزی", "بەرزەبون", "ازعــاج", "داخازكری", "گومانlێكری", "هەولا خوكوشتنێ", "خوكوشتن", "كوشتن", "گیان ژدەستدان", "بێ سەمیان", "كێشانا سكوتینێ", "فیلبازی تشقلە", "ترومبيلا بي خودان", "ئاگر بەربون", "تەقەكرن", "مەلەڤاني جهی قەدەغە", "تێكدەر", "خەندقین", "گەفكرن"];
+const issueTypeOptions = ["ئاریشا خێزانی", "خازوك", "شـــەر", "سەرخوش", "رویدانا ترومبێلێ", "مخەدەر", "دزی", "بەرزەبون", "ازعــاج", "داخازكری", "گومانلێكری", "هەولا خوكوشتنێ", "خوكوشتن", "كوشتن", "گیان ژدەستدان", "بێ سەمیان", "كێشانا سكوتینێ", "فیلبازی تشقلە", "ترومبيلا بي خودان", "ئاگر بەربون", "تەقەكرن", "مەلەڤاني جهی قەدەغە", "تێكدەر", "خەندقین", "گەفكرن"];
 const driverNameOptions = ["سليمان علي حميد", "نیچیرڤان عباس بشار", "نعمان رمضان محمد", "رضوان محمود محمد", "داود قادر ندیر ناصر", "سربست محمدعلی", "حسن رؤوف حسن", "ريزان سمو محمد", "صابر شفیق شمزین", "رضوان رمضان علی", "سعید سربست رسول", "نیجیرڤان احمد علی", "دشتی عادل عثمان", "ریبر سلمان عثمان", "ازاد عدنان عبدالله", "بیوار اسماعیل محمد", "مهڤان تحسين پيراموس", "فارس بكر رشید"];
 const pointOptions = ["100", "101", "102", "103", "105", "106", "107", "108", "109", "110", "111", "112"];
 const sentToOptions = ["بنگەهێ پولیسێن كارێز", "بنگەهێ پولیسێن زاخو", "بنگەهێ پولیسێن سێمالكا", "بنگەهێ پولیسێن دەلال", "بنگەهێ پولیسێن بێدارێ", "بنگەهێ پولیسێن نیو زاخو", "بنگەهێ پولیسێن رزگاری", "رێڤەبەریا پولیسێن زاخو", "توندوتیژیا زاخو", "نەخوشخانا زاخو", "دەستێ سەمیانا", "مكافحا زاخو", "مكافحا بێدارێ", "ئاسايشا زاخو", "ئاگرڤەمراندنا زاخو", "گرتیخانا زاخو", "هاتوچووا زاخو"];

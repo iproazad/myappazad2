@@ -1,6 +1,6 @@
 
 import React from 'react';
-import type { Page } from '../App.tsx';
+import type { Page } from '../App';
 
 interface HeaderProps {
   currentPage: Page;
