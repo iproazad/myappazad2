@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
   <head>
@@ -103,12 +102,12 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <!-- Add Babel for in-browser JSX/TSX transformation -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.1.1/",
     "react": "https://aistudiocdn.com/react@^19.1.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/"
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/"
   }
 }
 </script>
@@ -155,6 +154,29 @@
         };
 
         // --- From components/Icons.tsx ---
+        const IconWrapper = ({ children, className }) => <div className={`w-6 h-6 flex-shrink-0 text-blue-400 ${className}`}>{children}</div>;
+        const DetailItem = ({ icon, label, value }) => (
+            <div className="flex items-start gap-3">
+                {icon}
+                <div>
+                    <p className="text-gray-400 text-xs">{label}</p>
+                    <p className="font-semibold text-sm text-white">{value || '-'}</p>
+                </div>
+            </div>
+        );
+
+        const PoliceBadgeIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3z"></path></svg>);
+        const UserIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>);
+        const CalendarIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M-4.5 12h27" /></svg>);
+        const MapPinIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>);
+        const PhoneIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>);
+        const UsersIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-4.663l.001.109m-8.375 5.065a4.125 4.125 0 01-7.533-2.493m3.75 2.493a4.125 4.125 0 013.75 0" /></svg>);
+        const BriefcaseIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.07a2.25 2.25 0 01-2.25 2.25h-13.5a2.25 2.25 0 01-2.25-2.25v-4.07m18-4.22l-1.5-1.5a2.25 2.25 0 00-3.182 0l-1.5 1.5a2.25 2.25 0 01-3.182 0l-1.5-1.5a2.25 2.25 0 00-3.182 0l-1.5 1.5A2.25 2.25 0 005.25 6H10" /></svg>);
+        const LockClosedIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>);
+        const ClockIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>);
+        const BookmarkIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5" /></svg>);
+        const HashtagIcon = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5l-3.9 19.5m-2.1-19.5l-3.9 19.5" /></svg>);
+
         const CameraIcon = ({ className }) => (
           <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -177,6 +199,12 @@
         const UserPlusIcon = ({ className }) => (
             <svg className={className || "w-5 h-5"} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+        );
+        
+        const WhatsAppIcon = ({ className }) => (
+            <svg className={className || "w-5 h-5"} viewBox="0 0 24 24" fill="currentColor">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.267.655 4.398 1.908 6.161l.111.169-1.125 4.105 4.216-1.105.16.096z" />
             </svg>
         );
 
@@ -284,6 +312,49 @@
           );
         };
         
+        // --- From components/Modal.tsx ---
+        const Modal = ({ isOpen, onClose, children }) => {
+          useEffect(() => {
+            const handleEscape = (event) => {
+              if (event.key === 'Escape') {
+                onClose();
+              }
+            };
+            if (isOpen) {
+              document.addEventListener('keydown', handleEscape);
+            }
+            return () => {
+              document.removeEventListener('keydown', handleEscape);
+            };
+          }, [isOpen, onClose]);
+
+          if (!isOpen) return null;
+
+          return ReactDOM.createPortal(
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4"
+              onClick={onClose}
+              role="dialog"
+              aria-modal="true"
+            >
+              <div 
+                className="bg-gray-900 rounded-xl shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-4 sm:p-6 relative">
+                  <button onClick={onClose} className="absolute top-4 left-4 text-gray-400 hover:text-white transition-colors z-10">
+                    <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                  {children}
+                </div>
+              </div>
+            </div>,
+            document.body
+          );
+        };
+
         // --- From pages/SuspectPage.tsx ---
         const SuspectPage = () => {
             const emptySuspect = {
@@ -301,37 +372,55 @@
                 const formattedDate = registrationDate.toLocaleDateString('ar-IQ');
                 const formattedTime = registrationDate.toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit', hour12: true });
                 return (
-                    <div ref={ref} className="w-full max-w-2xl bg-gray-200 p-1 font-sans text-gray-900">
-                        <div className="bg-red-700 text-white text-center p-2 shadow-md"><h2 className="text-lg sm:text-xl font-bold">بەشێ پولیسێن هەوارهاتنێ</h2></div>
-                        <div className="p-3 bg-white">
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <div className="flex-1 flex flex-col gap-1 text-xs sm:text-sm">
-                                    <div className="p-2 bg-gray-100 border-r-4 border-red-600 rounded-l-sm"><strong>ناڤێ تومەتباری:</strong> {suspect.name}</div>
-                                    <div className="p-2 bg-gray-100 border-r-4 border-red-600 rounded-l-sm"><strong>ژدایـــكبون:</strong> {suspect.birthdate || '-'}</div>
-                                    <div className="p-2 bg-gray-100 border-r-4 border-red-600 rounded-l-sm"><strong>ژمارا موبایلي:</strong> {suspect.phone || '-'}</div>
-                                    <div className="p-2 bg-gray-100 border-r-4 border-red-600 rounded-l-sm"><strong>ئاكنجی بوون:</strong> {suspect.address || '-'}</div>
-                                    <div className="p-2 bg-gray-100 border-r-4 border-red-600 rounded-l-sm"><strong>بارێ خێزانی:</strong> {suspect.maritalStatus || '-'}</div>
-                                    <div className="p-2 bg-gray-100 border-r-4 border-red-600 rounded-l-sm"><strong>زیندانكرن:</strong> {suspect.prison || '-'}</div>
+                    <div ref={ref} id="suspect-card-content" className="w-full max-w-4xl bg-gradient-to-br from-gray-900 to-black rounded-2xl shadow-2xl overflow-hidden font-sans text-white border border-blue-800/50">
+                        <div className="bg-black/30 p-4 flex items-center justify-between border-b border-gray-700 backdrop-blur-sm">
+                            <h2 className="text-xl sm:text-2xl font-bold text-blue-300 tracking-wider">بەشێ پولیسێن هەوارهاتنێ</h2>
+                            <PoliceBadgeIcon className="w-10 h-10 text-blue-500" />
+                        </div>
+
+                        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="md:col-span-1 flex flex-col items-center text-center space-y-4">
+                                <div className="w-48 h-56 rounded-lg border-4 border-blue-500/50 shadow-lg flex items-center justify-center overflow-hidden bg-gray-800">
+                                    {suspect.photo ? <img src={suspect.photo} alt="صورة المتهم" className="w-full h-full object-cover" /> : <CameraIcon className="w-20 h-20 text-gray-500" />}
                                 </div>
-                                <div className="w-full sm:w-40 h-56 border-2 border-red-600 rounded-md flex items-center justify-center overflow-hidden flex-shrink-0 bg-gray-300 self-center">
-                                    {suspect.photo ? <img src={suspect.photo} alt="صورة المتهم" className="w-full h-full object-cover" /> : <CameraIcon className="w-16 h-16 text-gray-500" />}
-                                </div>
-                            </div>
-                            <div className="mt-3 p-3 bg-blue-800 text-white rounded-md shadow-inner text-xs sm:text-sm">
-                                <h3 className="text-center font-bold text-sm sm:text-base mb-2 border-b pb-1">پێزانینێن رویدانێ</h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
-                                    <div><strong>الوقت:</strong> {suspect.timeFrom || '-'} - {suspect.timeTo || '-'}</div>
-                                    <div><strong>الفترة:</strong> {suspect.period}</div>
-                                    <div className="sm:col-span-2"><strong>جهێ ئاریشێ:</strong> {suspect.problemLocation || '-'}</div>
-                                    <div><strong>ناڤێ شوفێری:</strong> {suspect.driverName || '-'}</div>
-                                    <div><strong>خالا:</strong> {suspect.point || '-'}</div>
-                                    <div className="mt-1 p-2 bg-green-200 text-green-900 rounded text-center font-semibold"><strong>رەوانەكرن بـــو:</strong> {suspect.sentTo || '-'}</div>
-                                    <div className="mt-1 p-2 bg-red-200 text-red-900 rounded text-center font-semibold"><strong>جورێ ئاریشێ:</strong> {suspect.problemType || '-'}</div>
+                                <div className="w-full bg-gray-800/50 p-3 rounded-lg border border-gray-700">
+                                    <p className="text-gray-400 text-sm">ناڤێ تومەتباری</p>
+                                    <p className="font-bold text-xl text-blue-100">{suspect.name}</p>
                                 </div>
                             </div>
-                            <div className="mt-3 text-center p-2 bg-red-700 text-white rounded-md font-bold text-xs sm:text-sm">
-                                مێژویا توماركرنا رویدانێ: {formattedDate} - {formattedTime}
+
+                            <div className="md:col-span-2 space-y-4">
+                                <h3 className="text-lg font-semibold text-blue-400 border-b border-blue-500/30 pb-2">زانیاری کەسی</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <DetailItem icon={<IconWrapper><CalendarIcon /></IconWrapper>} label="ژدایـــكبون" value={suspect.birthdate} />
+                                    <DetailItem icon={<IconWrapper><PhoneIcon /></IconWrapper>} label="ژمارا موبایلي" value={suspect.phone} />
+                                    <DetailItem icon={<IconWrapper><MapPinIcon /></IconWrapper>} label="ئاكنجی بوون" value={suspect.address} />
+                                    <DetailItem icon={<IconWrapper><UsersIcon /></IconWrapper>} label="بارێ خێزانی" value={suspect.maritalStatus} />
+                                    <DetailItem icon={<IconWrapper><BriefcaseIcon /></IconWrapper>} label="كارێ وی" value={suspect.job} />
+                                    <DetailItem icon={<IconWrapper><LockClosedIcon /></IconWrapper>} label="زیندانكرن" value={suspect.prison} />
+                                </div>
+                                <h3 className="text-lg font-semibold text-blue-400 border-b border-blue-500/30 pb-2 pt-4">پێزانینێن رویدانێ</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                     <DetailItem icon={<IconWrapper><ClockIcon /></IconWrapper>} label="الوقت" value={`${suspect.timeFrom || '-'} - ${suspect.timeTo || '-'}`} />
+                                     <DetailItem icon={<IconWrapper className="text-yellow-400"><ClockIcon /></IconWrapper>} label="الفترة" value={suspect.period} />
+                                     <DetailItem icon={<IconWrapper><UserIcon /></IconWrapper>} label="ناڤێ شوفێری" value={suspect.driverName} />
+                                     <DetailItem icon={<IconWrapper><HashtagIcon /></IconWrapper>} label="خالا" value={suspect.point} />
+                                     <div className="sm:col-span-2"><DetailItem icon={<IconWrapper><MapPinIcon /></IconWrapper>} label="جهێ ئاریشێ" value={suspect.problemLocation} /></div>
+                                     <div className="bg-green-900/50 text-green-300 p-3 rounded-lg font-semibold flex items-start gap-3">
+                                        <IconWrapper className="text-green-400"><BookmarkIcon /></IconWrapper>
+                                        <div> <p className="text-green-200/80 text-xs">رەوانەكرن بـــو</p> <p>{suspect.sentTo || '-'}</p> </div>
+                                     </div>
+                                     <div className="bg-red-900/50 text-red-300 p-3 rounded-lg font-semibold flex items-start gap-3">
+                                        <IconWrapper className="text-red-400"><BookmarkIcon /></IconWrapper>
+                                        <div> <p className="text-red-200/80 text-xs">جورێ ئاریشێ</p> <p>{suspect.problemType || '-'}</p> </div>
+                                     </div>
+                                </div>
                             </div>
+                        </div>
+
+                        <div className="bg-black/30 p-3 text-center text-xs text-gray-400 border-t border-gray-700 flex items-center justify-center gap-2 backdrop-blur-sm">
+                            <ClockIcon className="w-4 h-4" />
+                            <span>مێژویا توماركرنا رویدانێ: {formattedDate} - {formattedTime}</span>
                         </div>
                     </div>
                 );
@@ -339,14 +428,14 @@
 
             const [suspects, setSuspects] = useLocalStorage('suspects', []);
             const [formData, setFormData] = useState(emptySuspect);
-            const [generatedCard, setGeneratedCard] = useState(null);
+            const [modalSuspect, setModalSuspect] = useState(null);
             const cardRef = useRef(null);
             const [searchTerm, setSearchTerm] = useState('');
             const [sortBy, setSortBy] = useState('date-desc');
 
             const handleDownload = useCallback((suspect) => {
                 if (!cardRef.current) return;
-                window.htmlToImage.toPng(cardRef.current, { backgroundColor: '#111827', quality: 1, pixelRatio: 3 })
+                window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 3 })
                     .then((dataUrl) => {
                         const link = document.createElement('a');
                         link.download = `بطاقة-متهم-${suspect.name.replace(/ /g, '_')}.png`;
@@ -355,16 +444,30 @@
                     })
                     .catch((err) => console.error('oops, something went wrong!', err));
             }, []);
+            
+            const handleShare = async (suspect) => {
+              if (!cardRef.current) return;
+              const fileName = `بطاقة-متهم-${suspect.name.replace(/ /g, '_')}.png`;
+              try {
+                const dataUrl = await window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 2 });
+                const res = await fetch(dataUrl);
+                const blob = await res.blob();
+                const file = new File([blob], fileName, { type: 'image/png' });
 
-            const handlePrint = () => {
-                const printableElement = cardRef.current;
-                if (!printableElement) return;
-                const printContainer = document.createElement('div');
-                printContainer.id = 'printable-area';
-                document.body.appendChild(printContainer);
-                printContainer.appendChild(printableElement.cloneNode(true));
-                window.print();
-                document.body.removeChild(printContainer);
+                if (navigator.share && navigator.canShare({ files: [file] })) {
+                  await navigator.share({
+                    title: 'بطاقة متهم',
+                    text: `معلومات المتهم: ${suspect.name}`,
+                    files: [file],
+                  });
+                } else {
+                  alert('متصفحك لا يدعم المشاركة المباشرة. سيتم تحميل الصورة لتتمكن من مشاركتها يدويًا.');
+                  handleDownload(suspect);
+                }
+              } catch (error) {
+                console.error('Error sharing card:', error);
+                alert('حدث خطأ أثناء محاولة مشاركة البطاقة.');
+              }
             };
 
             const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }));
@@ -381,21 +484,14 @@
                 e.preventDefault();
                 const newSuspect = { id: Date.now().toString(), date: new Date().toISOString(), ...formData };
                 setSuspects(prev => [newSuspect, ...prev]);
-                setGeneratedCard(newSuspect);
+                setModalSuspect(newSuspect);
                 setFormData(emptySuspect);
                 const fileInput = document.getElementById('photo-upload');
                 if(fileInput) fileInput.value = "";
             };
-            
-            useEffect(() => {
-                if (generatedCard) {
-                    const timer = setTimeout(() => handleDownload(generatedCard), 500);
-                    return () => clearTimeout(timer);
-                }
-            }, [generatedCard, handleDownload]);
 
             const handleSelectSuspect = (suspect) => {
-                setGeneratedCard(suspect);
+                setModalSuspect(suspect);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
 
@@ -414,14 +510,18 @@
 
             return (
                 <div className="space-y-8">
-                    {generatedCard && (
-                        <div className="bg-gray-800 p-4 rounded-lg shadow-2xl flex flex-col items-center">
-                            <SuspectCard ref={cardRef} suspect={generatedCard} />
-                            <div className="mt-6 flex gap-4 justify-center">
-                                <Button onClick={handlePrint} icon={<PrintIcon />} text="طباعة" />
-                                <Button onClick={() => handleDownload(generatedCard)} icon={<DownloadIcon />} text="تحميل كصورة" />
+                    {modalSuspect && (
+                        <Modal isOpen={!!modalSuspect} onClose={() => setModalSuspect(null)}>
+                            <div className="bg-gray-900 p-4 rounded-lg flex flex-col items-center">
+                                <h2 className="text-xl font-bold text-white mb-4">تم إنشاء البطاقة بنجاح</h2>
+                                <SuspectCard ref={cardRef} suspect={modalSuspect} />
+                                <div className="mt-6 flex flex-wrap gap-4 justify-center">
+                                    <Button onClick={() => setModalSuspect(null)} icon={<UserPlusIcon />} text="إضافة متهم جديد" className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-800" />
+                                    <Button onClick={() => handleShare(modalSuspect)} icon={<WhatsAppIcon className="w-5 h-5 text-white"/>} text="مشاركة" className="bg-green-600 hover:bg-green-700 focus:ring-green-800" />
+                                    <Button onClick={() => handleDownload(modalSuspect)} icon={<DownloadIcon />} text="حفظ البطاقة" />
+                                </div>
                             </div>
-                        </div>
+                        </Modal>
                     )}
                     
                     <div className="bg-gray-800 p-6 rounded-lg shadow-xl">
@@ -525,43 +625,66 @@
             const IncidentCard = forwardRef(({ incident }, ref) => {
                 const timestamp = new Date(incident.date).toLocaleString('ar-IQ');
                 return (
-                    <div ref={ref} className="w-full max-w-4xl bg-gray-300 p-1 text-gray-900 font-sans border-4 border-blue-600">
-                        <div className="bg-blue-700 text-white p-4 text-center">
-                            <h2 className="text-2xl sm:text-3xl font-bold">توماری ئاریشە</h2>
-                            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-left text-xs sm:text-sm">
-                                <div><strong>جورێ ئاریشێ:</strong> {incident.caseInfo.issueType || '-'}</div>
-                                <div><strong>ناڤێ شوفێری:</strong> {incident.caseInfo.driverName || '-'}</div>
-                                <div><strong>دەمژمێر:</strong> {incident.caseInfo.timeFrom || '-'} - {incident.caseInfo.timeTo || '-'} ({incident.caseInfo.period})</div>
-                                <div><strong>خالا:</strong> {incident.caseInfo.point || '-'}</div>
-                                <div className="sm:col-span-2"><strong>جهێ ئاریشێ:</strong> {incident.caseInfo.location || '-'}</div>
-                                <div className="sm:col-span-2"><strong>رەوانەكرن بـــو:</strong> {incident.caseInfo.sentTo || '-'}</div>
-                            </div>
-                            <p className="mt-3 text-xs sm:text-sm"><strong>تاریخ:</strong> {new Date(incident.date).toLocaleDateString('ar-IQ')}</p>
+                    <div ref={ref} className="w-full max-w-6xl bg-gradient-to-br from-gray-900 to-black rounded-2xl shadow-2xl overflow-hidden font-sans text-white border border-blue-800/50">
+                        <div className="bg-black/30 p-4 flex items-center justify-between border-b border-gray-700 backdrop-blur-sm">
+                            <h2 className="text-2xl sm:text-3xl font-bold text-blue-300 text-center w-full">توماری ئاریشە</h2>
                         </div>
-                        <div className="p-2 space-y-3">
-                            {incident.persons.map((person, index) => (
-                                <div key={person.id} className="bg-white p-3 rounded-lg shadow-md flex flex-col sm:flex-row gap-4 items-center sm:items-start border border-gray-300">
-                                    <div className="relative flex-shrink-0">
-                                       <div className="w-28 h-36 bg-gray-200 rounded-md flex items-center justify-center overflow-hidden border-2 border-blue-500">
-                                            {person.photo ? <img src={person.photo} alt={person.name} className="w-full h-full object-cover" /> : <CameraIcon className="w-12 h-12 text-gray-400" />}
-                                       </div>
-                                        <span className="absolute -top-2 -right-2 bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold border-2 border-white">{index + 1}</span>
-                                    </div>
-                                    <div className="flex-1 w-full text-xs sm:text-sm">
-                                        <div className={`inline-block px-3 py-1 rounded-full text-white font-semibold mb-2 text-xs ${person.type === 'تاوانبار' ? 'bg-red-600' : 'bg-green-600'}`}>{person.type}</div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
-                                            <p><strong>ناڤ:</strong> {person.name}</p>
-                                            <p><strong>ژدایـــكبون:</strong> {person.birthdate}</p>
-                                            <p className="md:col-span-2"><strong>ئاكنجی بوون:</strong> {person.address}</p>
-                                            <p className="md:col-span-2"><strong>موبایل:</strong> {person.phone || '-'}</p>
-                                        </div>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:gap-6">
+                            {/* Left side: Case info */}
+                            <div className="lg:col-span-4 bg-gray-800/50 p-6 border-b lg:border-b-0 lg:border-r border-gray-700">
+                                <h3 className="text-xl font-bold text-blue-400 mb-4 pb-2 border-b border-blue-500/30">پێزانینێن رویدانێ</h3>
+                                <div className="space-y-4 text-sm">
+                                    <DetailItem icon={<IconWrapper><BookmarkIcon /></IconWrapper>} label="جورێ ئاریشێ" value={incident.caseInfo.issueType} />
+                                    <DetailItem icon={<IconWrapper><UserIcon /></IconWrapper>} label="ناڤێ شوفێری" value={incident.caseInfo.driverName} />
+                                    <DetailItem icon={<IconWrapper><MapPinIcon /></IconWrapper>} label="جهێ ئاریشێ" value={incident.caseInfo.location} />
+                                    <DetailItem icon={<IconWrapper><HashtagIcon /></IconWrapper>} label="خالا" value={incident.caseInfo.point} />
+                                    <DetailItem icon={<IconWrapper><ClockIcon /></IconWrapper>} label="دەمژمێر" value={`${incident.caseInfo.timeFrom || '-'} - ${incident.caseInfo.timeTo || '-'} (${incident.caseInfo.period})`} />
+                                    <div className="bg-green-900/50 text-green-300 p-3 rounded-lg font-semibold flex items-start gap-3 mt-2">
+                                         <IconWrapper className="text-green-400"><BookmarkIcon /></IconWrapper>
+                                        <div><p className="text-green-200/80 text-xs">رەوانەكرن بـــو</p><p>{incident.caseInfo.sentTo}</p></div>
                                     </div>
                                 </div>
-                            ))}
+                            </div>
+
+                            {/* Right side: Persons */}
+                            <div className="lg:col-span-8 p-6">
+                                 <h3 className="text-xl font-bold text-blue-400 mb-4 pb-2 border-b border-blue-500/30">کەسێن تێدا</h3>
+                                <div className="space-y-4">
+                                    {incident.persons.map((person) => (
+                                        <div key={person.id} className="bg-gray-800/70 p-4 rounded-xl shadow-lg flex flex-col sm:flex-row gap-4 items-center sm:items-start relative overflow-hidden border border-gray-700">
+                                            <span className={`absolute top-0 right-0 px-4 py-1 text-xs font-bold text-white rounded-bl-lg ${person.type === 'تاوانبار' ? 'bg-red-600' : 'bg-green-600'}`}>{person.type}</span>
+                                            <div className="flex-shrink-0">
+                                                <div className="w-28 h-36 rounded-lg border-4 border-blue-500/30 shadow-lg flex items-center justify-center overflow-hidden bg-gray-700">
+                                                    {person.photo ? <img src={person.photo} alt={person.name} className="w-full h-full object-cover" /> : <CameraIcon className="w-12 h-12 text-gray-500" />}
+                                                </div>
+                                            </div>
+                                            <div className="flex-1 w-full text-sm space-y-2 pt-4 sm:pt-0">
+                                                <div className="flex items-center gap-3">
+                                                    <IconWrapper><UserIcon /></IconWrapper>
+                                                    <div>
+                                                        <p className="text-gray-400 text-xs">ناڤ</p>
+                                                        <p className="font-bold text-base text-white">{person.name}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 border-t border-gray-700/50">
+                                                    <DetailItem icon={<IconWrapper><CalendarIcon /></IconWrapper>} label="ژدایـــكبون" value={person.birthdate} />
+                                                    <DetailItem icon={<IconWrapper><PhoneIcon /></IconWrapper>} label="موبایل" value={person.phone} />
+                                                    <div className="md:col-span-2">
+                                                      <DetailItem icon={<IconWrapper><MapPinIcon /></IconWrapper>} label="ئاكنجی بوون" value={person.address} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-                        <footer className="bg-blue-700 text-white text-center p-1 text-xs sm:text-sm font-semibold">
-                            تم إنشاء هذه البطاقة في: {timestamp}
-                        </footer>
+                        
+                        <div className="bg-black/30 p-3 text-center text-xs text-gray-400 border-t border-gray-700 flex items-center justify-center gap-2 backdrop-blur-sm">
+                           <ClockIcon className="w-4 h-4" />
+                           <span>تم إنشاء هذه البطاقة في: {timestamp}</span>
+                        </div>
                     </div>
                 );
             });
@@ -569,14 +692,14 @@
             const [incidents, setIncidents] = useLocalStorage('incidents', []);
             const [caseInfo, setCaseInfo] = useState(emptyCaseInfo);
             const [persons, setPersons] = useState([]);
-            const [generatedCard, setGeneratedCard] = useState(null);
+            const [modalIncident, setModalIncident] = useState(null);
             const cardRef = useRef(null);
             const [searchTerm, setSearchTerm] = useState('');
             const [sortBy, setSortBy] = useState('date-desc');
 
             const handleDownload = useCallback((incident) => {
                 if (!cardRef.current) return;
-                window.htmlToImage.toPng(cardRef.current, { backgroundColor: '#111827', quality: 1, pixelRatio: 3 })
+                window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 3 })
                     .then((dataUrl) => {
                         const link = document.createElement('a');
                         link.download = `قضية-${incident.caseInfo.issueType.replace(/ /g, '_')}.png`;
@@ -586,21 +709,29 @@
                     .catch((err) => console.error('oops, something went wrong!', err));
             }, []);
             
-            useEffect(() => {
-                if (generatedCard) {
-                    const timer = setTimeout(() => handleDownload(generatedCard), 500);
-                    return () => clearTimeout(timer);
-                }
-            }, [generatedCard, handleDownload]);
+             const handleShare = async (incident) => {
+              if (!cardRef.current) return;
+              const fileName = `قضية-${incident.caseInfo.issueType.replace(/ /g, '_')}.png`;
+              try {
+                const dataUrl = await window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 2 });
+                const res = await fetch(dataUrl);
+                const blob = await res.blob();
+                const file = new File([blob], fileName, { type: 'image/png' });
 
-            const handlePrint = () => {
-                if (!cardRef.current) return;
-                const printContainer = document.createElement('div');
-                printContainer.id = 'printable-area';
-                document.body.appendChild(printContainer);
-                printContainer.appendChild(cardRef.current.cloneNode(true));
-                window.print();
-                document.body.removeChild(printContainer);
+                if (navigator.share && navigator.canShare({ files: [file] })) {
+                  await navigator.share({
+                    title: 'بطاقة قضية',
+                    text: `تفاصيل قضية: ${incident.caseInfo.issueType}`,
+                    files: [file],
+                  });
+                } else {
+                  alert('متصفحك لا يدعم المشاركة المباشرة. سيتم تحميل الصورة لتتمكن من مشاركتها يدويًا.');
+                  handleDownload(incident);
+                }
+              } catch (error) {
+                console.error('Error sharing card:', error);
+                alert('حدث خطأ أثناء محاولة مشاركة البطاقة.');
+              }
             };
 
             const handleCaseInfoChange = (e) => setCaseInfo(prev => ({ ...prev, [e.target.id]: e.target.value }));
@@ -620,13 +751,13 @@
                 if (persons.length === 0) return alert('يجب إضافة شخص واحد على الأقل.');
                 const newIncident = { id: Date.now().toString(), date: new Date().toISOString(), caseInfo, persons };
                 setIncidents(prev => [newIncident, ...prev]);
-                setGeneratedCard(newIncident);
+                setModalIncident(newIncident);
                 setCaseInfo(emptyCaseInfo);
                 setPersons([]);
             };
 
             const handleSelectIncident = (incident) => {
-                setGeneratedCard(incident);
+                setModalIncident(incident);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
 
@@ -645,14 +776,18 @@
 
             return (
                 <div className="space-y-8">
-                    {generatedCard && (
-                        <div className="bg-gray-800 p-4 rounded-lg shadow-2xl flex flex-col items-center">
-                            <IncidentCard ref={cardRef} incident={generatedCard} />
-                            <div className="mt-6 flex gap-4 justify-center">
-                                <Button onClick={handlePrint} icon={<PrintIcon />} text="طباعة" />
-                                <Button onClick={() => handleDownload(generatedCard)} icon={<DownloadIcon />} text="تحميل كصورة" />
+                    {modalIncident && (
+                        <Modal isOpen={!!modalIncident} onClose={() => setModalIncident(null)}>
+                            <div className="bg-gray-900 p-4 rounded-lg flex flex-col items-center">
+                                <h2 className="text-xl font-bold text-white mb-4">تم إنشاء بطاقة القضية بنجاح</h2>
+                                <IncidentCard ref={cardRef} incident={modalIncident} />
+                                <div className="mt-6 flex flex-wrap gap-4 justify-center">
+                                    <Button onClick={() => setModalIncident(null)} icon={<UserPlusIcon />} text="إضافة قضية جديدة" className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-800" />
+                                    <Button onClick={() => handleShare(modalIncident)} icon={<WhatsAppIcon className="w-5 h-5 text-white"/>} text="مشاركة" className="bg-green-600 hover:bg-green-700 focus:ring-green-800" />
+                                    <Button onClick={() => handleDownload(modalIncident)} icon={<DownloadIcon />} text="حفظ البطاقة" />
+                                </div>
                             </div>
-                        </div>
+                        </Modal>
                     )}
                     <div className="bg-gray-800 p-6 rounded-lg shadow-xl">
                         <h2 className="text-2xl font-bold mb-6 text-blue-400 border-b-2 border-blue-500 pb-2">تسجيل قضية جديدة</h2>
