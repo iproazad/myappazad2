@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import Header from './components/Header';
-import SuspectPage from './pages/SuspectPage';
-import IncidentPage from './pages/IncidentPage';
+import Header from './components/Header.tsx';
+import SuspectPage from './pages/SuspectPage.tsx';
+import IncidentPage from './pages/IncidentPage.tsx';
 
 export type Page = 'suspect' | 'incident';
 
