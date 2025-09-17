@@ -327,99 +327,13 @@
           );
         };
 
-        const CameraModal = ({ onCapture, onClose }) => {
-            const videoRef = useRef(null);
-            const streamRef = useRef(null);
-            const [error, setError] = useState('');
-            const [facingMode, setFacingMode] = useState('user');
-
-            const startCamera = useCallback(async () => {
-                setError('');
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    setError('Camera API is not supported by your browser.');
-                    return;
-                }
-                if (streamRef.current) {
-                    streamRef.current.getTracks().forEach(track => track.stop());
-                }
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode } });
-                    if (videoRef.current) {
-                        videoRef.current.srcObject = stream;
-                    }
-                    streamRef.current = stream;
-                } catch (err) {
-                    console.error("Error accessing camera: ", err);
-                    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                        setError('Camera permission denied. Please enable camera access in your browser settings.');
-                    } else {
-                        setError('Could not access camera. Please check if it is being used by another application or is disconnected.');
-                    }
-                }
-            }, [facingMode]);
-
-            useEffect(() => {
-                startCamera();
-                return () => {
-                    if (streamRef.current) {
-                        streamRef.current.getTracks().forEach(track => track.stop());
-                    }
-                };
-            }, [startCamera]);
-
-            const handleCaptureClick = () => {
-                const video = videoRef.current;
-                if (video && video.readyState >= 2) {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    const ctx = canvas.getContext('2d');
-                    if (ctx) {
-                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-                        onCapture(dataUrl);
-                    }
-                }
-            };
-
-            const toggleFacingMode = () => {
-                setFacingMode(prev => (prev === 'user' ? 'environment' : 'user'));
-            };
-
-            return (
-                <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" aria-modal="true" role="dialog">
-                    <div className="bg-gray-800 p-4 rounded-lg shadow-xl relative w-full max-w-lg mx-auto">
-                        <h3 className="text-lg font-semibold text-center text-white mb-2">التقاط صورة</h3>
-                        <div className="relative">
-                            {error ? (
-                                <div className="text-red-400 bg-red-900/50 p-4 rounded-lg text-center h-64 flex items-center justify-center">
-                                    <p>{error}</p>
-                                </div>
-                            ) : (
-                                <video ref={videoRef} autoPlay playsInline className="w-full h-auto rounded-md bg-gray-900 aspect-video"></video>
-                            )}
-                            {!error && (
-                                <button onClick={toggleFacingMode} className="absolute top-2 right-2 bg-black/50 text-white p-2 rounded-full hover:bg-black/75" aria-label="Switch camera">
-                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 11.667 0l3.181-3.183m-4.991-2.691V5.25a2.25 2.25 0 0 0-2.25-2.25h-4.5a2.25 2.25 0 0 0-2.25 2.25v4.5A2.25 2.25 0 0 0 6.75 12h4.5a2.25 2.25 0 0 0 2.25-2.25V9.348Z" /></svg>
-                                </button>
-                            )}
-                        </div>
-                        <div className="mt-4 flex justify-center gap-4">
-                            {!error && <Button onClick={handleCaptureClick} text="التقاط" icon={<CameraIcon className="w-5 h-5"/>} />}
-                            <Button onClick={onClose} text="إلغاء" className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-800" />
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
         const SuspectCard = forwardRef(({ suspect }, ref) => {
             const registrationDate = new Date(suspect.date);
             const formattedDate = registrationDate.toLocaleDateString('ar-IQ');
             const formattedTime = registrationDate.toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit', hour12: true });
 
             return (
-                <div ref={ref} id="suspect-card-content" className="w-full max-w-4xl bg-[#0d1117] text-white font-sans rounded-xl overflow-hidden shadow-2xl border border-blue-900/50">
+                <div ref={ref} id="suspect-card-content" className="w-[1000px] bg-[#0d1117] text-white font-sans rounded-xl overflow-hidden shadow-2xl border border-blue-900/50">
                     <div className="p-4 border-b border-blue-800/60">
                         <h2 className="text-3xl font-bold text-center text-blue-400">توماركرنا تومەتباری</h2>
                     </div>
@@ -464,6 +378,15 @@
                             </div>
                         </div>
                     </div>
+                    
+                    {suspect.notes && (
+                        <div className="p-4">
+                            <div className="bg-black/50 p-3 rounded-lg border border-blue-700/60">
+                                <h4 className="font-bold text-blue-400 mb-1">تێبینی:</h4>
+                                <p className="text-gray-300 whitespace-pre-wrap">{suspect.notes}</p>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="bg-black/40 p-2 text-center text-xs text-gray-400 border-t border-blue-800/60 flex items-center justify-center gap-2">
                         <ClockIcon className="w-4 h-4" />
@@ -478,7 +401,7 @@
             const creationTime = new Date(incident.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // HH:MM
 
             return (
-                <div ref={ref} className="w-full max-w-4xl bg-[#0d1117] text-white font-sans rounded-xl overflow-hidden shadow-2xl border border-blue-900/50">
+                <div ref={ref} className="w-[1000px] bg-[#0d1117] text-white font-sans rounded-xl overflow-hidden shadow-2xl border border-blue-900/50">
                     <div className="p-4 border-b border-blue-800/60">
                         <h2 className="text-3xl font-bold text-center text-blue-400">توماری ئاریشە</h2>
                     </div>
@@ -544,6 +467,15 @@
                         </div>
                     </div>
                     
+                    {incident.notes && (
+                        <div className="p-4">
+                            <div className="bg-black/50 p-3 rounded-lg border border-blue-700/60">
+                                <h4 className="font-bold text-blue-400 mb-1">تێبینی:</h4>
+                                <p className="text-gray-300 whitespace-pre-wrap">{incident.notes}</p>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="bg-black/40 p-2 text-center text-xs text-gray-400 border-t border-blue-800/60 flex items-center justify-center gap-2">
                         <ClockIcon className="w-4 h-4" />
                         <span>تم إنشاء هذه البطاقة في: {creationDate} م / {creationTime}</span>
@@ -599,7 +531,7 @@
             const emptySuspect = {
                 photo: null, name: '', birthdate: '', address: '', problemType: '', maritalStatus: '',
                 job: '', prison: '', phone: '', timeFrom: '', timeTo: '', period: 'روژ',
-                problemLocation: '', driverName: '', point: '', sentTo: '',
+                problemLocation: '', driverName: '', point: '', sentTo: '', notes: '',
             };
             const problemTypeOptions = ["ئاریشا خێزانی", "خازوك", "شـــەر", "سەرخوش", "رویدانا ترومبێلێ", "مخەدەر", "دزی", "بەرزەبون", "ازعــاج", "داخازكری", "گومانلێكری", "هەولا خوكوشتنێ", "خوكوشتن", "كوشتن", "گیان ژدەستدان", "بێ سەمیان", "كێشانا سكوتینێ", "فیلبازی تشقلە", "ترومبيلا بي خودان", "ئاگر بەربون", "تەقەكرن", "مەلەڤاني جهی قەدەغە", "تێكدەر", "خەندقین", "گەفكرن"];
             const driverNameOptions = ["سليمان علي حميد", "نیچیرڤان عباس بشار", "نعمان رمضان محمد", "رضوان محمود محمد", "داود قادر ندیر ناصر", "سربست محمدعلی", "حسن رؤوف حسن", "ريزان سمو محمد", "صابر شفیق شمزین", "رضوان رمضان علی", "سعید سربست رسول", "نیجیرڤان احمد علی", "دشتی عادل عثمان", "ریبر سلمان عثمان", "ازاد عدنان عبدالله", "بیوار اسماعیل محمد", "مهڤان تحسين پيراموس", "فارس بكر رشید"];
@@ -611,7 +543,6 @@
             const [generatedSuspect, setGeneratedSuspect] = useState(null);
             const cardRef = useRef(null);
             const topRef = useRef(null);
-            const [isCameraOpen, setIsCameraOpen] = useState(false);
 
             const handleDownload = useCallback((suspect) => {
                 if (!cardRef.current) return;
@@ -672,18 +603,6 @@
                 }
             };
 
-            const handleCapture = (dataUrl) => {
-                compressImage(dataUrl)
-                  .then(compressedDataUrl => {
-                    setFormData(prev => ({ ...prev, photo: compressedDataUrl }));
-                  })
-                  .catch(error => {
-                    console.error("Failed to compress image", error);
-                    setFormData(prev => ({ ...prev, photo: dataUrl }));
-                  });
-                setIsCameraOpen(false);
-            };
-
             const handleSubmit = (e) => {
                 e.preventDefault();
                 const newSuspect = { id: Date.now().toString(), date: new Date().toISOString(), ...formData };
@@ -705,14 +624,11 @@
 
             return (
                 <div className="space-y-8" ref={topRef}>
-                    {isCameraOpen && <CameraModal onCapture={handleCapture} onClose={() => setIsCameraOpen(false)} />}
                     {generatedSuspect && (
                         <div className="bg-gray-800 p-6 rounded-lg shadow-xl flex flex-col items-center">
                             <h2 className="text-xl font-bold text-white mb-4">تم إنشاء البطاقة بنجاح</h2>
-                            <div className="w-full flex justify-center items-center overflow-hidden">
-                                <div className="w-full" style={{ maxWidth: '900px' }}>
-                                    <SuspectCard ref={cardRef} suspect={generatedSuspect} />
-                                </div>
+                            <div className="w-full overflow-x-auto py-2">
+                                <SuspectCard ref={cardRef} suspect={generatedSuspect} />
                             </div>
                             <div className="mt-6 flex flex-wrap gap-4 justify-center">
                                 <Button onClick={() => setGeneratedSuspect(null)} icon={<UserPlusIcon />} text="إضافة متهم جديد" className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-800" />
@@ -729,16 +645,10 @@
                                 <div className="w-40 h-40 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden border-2 border-gray-500">
                                     {formData.photo ? <img src={formData.photo} alt="صورة المتهم" className="w-full h-full object-cover" /> : <CameraIcon className="w-16 h-16 text-gray-400" />}
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <label htmlFor="photo-upload" className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
-                                        <input id="photo-upload" type="file" className="hidden" onChange={handlePhotoChange} accept="image/*" />
-                                        <span>{formData.photo ? "تغيير الصورة" : "تحميل صورة"}</span>
-                                    </label>
-                                    <button type="button" onClick={() => setIsCameraOpen(true)} className="cursor-pointer bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm inline-flex items-center gap-2">
-                                        <CameraIcon className="w-5 h-5" />
-                                        <span>التقاط</span>
-                                    </button>
-                                </div>
+                                <label htmlFor="photo-upload" className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                    <input id="photo-upload" type="file" className="hidden" onChange={handlePhotoChange} accept="image/*" />
+                                    <span>{formData.photo ? "تغيير الصورة" : "التقاط أو تحميل صورة"}</span>
+                                </label>
                             </div>
                             <div className="border-t border-gray-700 pt-4">
                                 <h3 className="text-lg font-semibold text-gray-300 mb-4">زانیاری کەسی</h3>
@@ -770,6 +680,9 @@
                                    <InputField id="sentTo" label="رەوانەكرن بـــو" value={formData.sentTo} onChange={handleChange} datalistOptions={sentToOptions} />
                                 </div>
                             </div>
+                            <div className="border-t border-gray-700 pt-4">
+                                <InputField id="notes" label="تێبینی" as="textarea" value={formData.notes} onChange={handleChange} placeholder="... أضف ملاحظاتك هنا" />
+                            </div>
                             <div className="text-center pt-4">
                                 <Button type="submit" text="خەزنكرنا كارتێ" className="w-full md:w-auto" />
                             </div>
@@ -793,10 +706,10 @@
             const [incidents, setIncidents] = useLocalStorage('incidents', []);
             const [caseInfo, setCaseInfo] = useState(emptyCaseInfo);
             const [persons, setPersons] = useState([]);
+            const [notes, setNotes] = useState('');
             const [generatedIncident, setGeneratedIncident] = useState(null);
             const cardRef = useRef(null);
             const topRef = useRef(null);
-            const [cameraForPersonIndex, setCameraForPersonIndex] = useState(null);
 
             const handleDownload = useCallback((incident) => {
                 if (!cardRef.current) return;
@@ -856,30 +769,19 @@
                     reader.readAsDataURL(e.target.files[0]);
                 }
             };
-            const handleCapture = (dataUrl) => {
-                if (cameraForPersonIndex === null) return;
-                compressImage(dataUrl)
-                    .then(compressedDataUrl => {
-                        handlePersonChange(cameraForPersonIndex, 'photo', compressedDataUrl);
-                    })
-                    .catch(error => {
-                        console.error("Failed to compress image", error);
-                        handlePersonChange(cameraForPersonIndex, 'photo', dataUrl);
-                    });
-                setCameraForPersonIndex(null);
-            };
             const addPerson = () => setPersons([...persons, { id: Date.now().toString(), name: '', type: '', birthdate: '', address: '', phone: '', photo: null }]);
             const removePerson = (index) => setPersons(persons.filter((_, i) => i !== index));
 
             const handleSubmit = (e) => {
                 e.preventDefault();
                 if (persons.length === 0) return alert('يجب إضافة شخص واحد على الأقل.');
-                const newIncident = { id: Date.now().toString(), date: new Date().toISOString(), caseInfo, persons };
+                const newIncident = { id: Date.now().toString(), date: new Date().toISOString(), caseInfo, persons, notes };
                 const success = setIncidents(prev => [newIncident, ...prev]);
                 if (success) {
                     setGeneratedIncident(newIncident);
                     setCaseInfo(emptyCaseInfo);
                     setPersons([]);
+                    setNotes('');
                 }
             };
             
@@ -891,14 +793,11 @@
 
             return (
                 <div className="space-y-8" ref={topRef}>
-                    {cameraForPersonIndex !== null && <CameraModal onCapture={handleCapture} onClose={() => setCameraForPersonIndex(null)} />}
                     {generatedIncident && (
                         <div className="bg-gray-800 p-6 rounded-lg shadow-xl flex flex-col items-center">
                             <h2 className="text-xl font-bold text-white mb-4">تم إنشاء بطاقة القضية بنجاح</h2>
-                            <div className="w-full flex justify-center items-center overflow-hidden">
-                                <div className="w-full" style={{ maxWidth: '900px' }}>
-                                    <IncidentCard ref={cardRef} incident={generatedIncident} />
-                                </div>
+                            <div className="w-full overflow-x-auto py-2">
+                                <IncidentCard ref={cardRef} incident={generatedIncident} />
                             </div>
                             <div className="mt-6 flex flex-wrap gap-4 justify-center">
                                 <Button onClick={() => setGeneratedIncident(null)} icon={<UserPlusIcon />} text="إضافة قضية جديدة" className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-800" />
@@ -920,16 +819,10 @@
                                                 <div className="w-32 h-32 bg-gray-600 rounded-full overflow-hidden flex items-center justify-center">
                                                     {person.photo ? <img src={person.photo} alt={person.name} className="w-full h-full object-cover" /> : <CameraIcon className="w-12 h-12 text-gray-400"/>}
                                                 </div>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <label className="cursor-pointer bg-gray-600 text-white px-3 py-1.5 rounded-md hover:bg-gray-500 text-xs">
-                                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoChange(index, e)} />
-                                                        <span>{person.photo ? "تغيير" : "تحميل"}</span>
-                                                    </label>
-                                                    <button type="button" onClick={() => setCameraForPersonIndex(index)} className="cursor-pointer bg-green-600 text-white px-3 py-1.5 rounded-md hover:bg-green-700 text-xs inline-flex items-center gap-1">
-                                                        <CameraIcon className="w-4 h-4" />
-                                                        <span>التقاط</span>
-                                                    </button>
-                                                </div>
+                                                <label className="text-sm text-blue-400 cursor-pointer">
+                                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoChange(index, e)} />
+                                                    {person.photo ? "تغيير الصورة" : "تحميل صورة"}
+                                                </label>
                                             </div>
                                             <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <InputField id={`p-name-${index}`} label="ناڤێ تومەتباری" value={person.name} onChange={(e) => handlePersonChange(index, 'name', e.target.value)} required />
@@ -968,6 +861,9 @@
                                         <InputField id="sentTo" label="رەوانەكرن بـــو" value={caseInfo.sentTo} onChange={handleCaseInfoChange} datalistOptions={sentToOptions} />
                                     </div>
                                 </div>
+                            </div>
+                            <div className="border-t border-gray-700 pt-4">
+                                <InputField id="notes" label="تێبینی" as="textarea" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="... أضف ملاحظاتك هنا" />
                             </div>
                             <div className="text-center pt-4"><Button type="submit" text="خەزنكرنا كارتێ" className="w-full md:w-auto" /></div>
                         </form>
@@ -1073,12 +969,10 @@
                     {selectedRecord && (
                         <div className="bg-gray-800 p-6 rounded-lg shadow-xl flex flex-col items-center">
                             <h2 className="text-xl font-bold text-white mb-4">تفاصيل السجل</h2>
-                            <div className="w-full flex justify-center items-center overflow-hidden">
-                                <div className="w-full" style={{ maxWidth: '900px' }}>
-                                    {selectedRecord.type === 'suspect' ? 
-                                        <SuspectCard ref={cardRef} suspect={selectedRecord.data} /> : 
-                                        <IncidentCard ref={cardRef} incident={selectedRecord.data} />}
-                                </div>
+                            <div className="w-full overflow-x-auto py-2">
+                                {selectedRecord.type === 'suspect' ? 
+                                    <SuspectCard ref={cardRef} suspect={selectedRecord.data} /> : 
+                                    <IncidentCard ref={cardRef} incident={selectedRecord.data} />}
                             </div>
                             <div className="mt-6 flex flex-wrap gap-4 justify-center">
                                 <Button onClick={() => setSelectedRecord(null)} icon={<UserPlusIcon />} text="إخفاء التفاصيل" className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-800" />
