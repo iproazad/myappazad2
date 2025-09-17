@@ -326,35 +326,180 @@
             </div>
           );
         };
+
+        const SuspectCard = forwardRef(({ suspect }, ref) => {
+            const registrationDate = new Date(suspect.date);
+            const formattedDate = registrationDate.toLocaleDateString('ar-IQ');
+            const formattedTime = registrationDate.toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            return (
+                <div ref={ref} id="suspect-card-content" className="w-[1000px] bg-[#0d1117] text-white font-sans rounded-xl overflow-hidden shadow-2xl border border-blue-900/50">
+                    <div className="p-4 border-b border-blue-800/60">
+                        <h2 className="text-3xl font-bold text-center text-blue-400">توماركرنا تومەتباری</h2>
+                    </div>
+                    
+                    <div className="grid grid-cols-12 gap-4 p-4">
+                        <div className="col-span-8 p-4 bg-black/30 rounded-lg border border-gray-700 space-y-4">
+                            <div>
+                                <h3 className="text-xl font-bold text-blue-400 mb-2 pb-2 border-b border-blue-500/30">زانیاری کەسی</h3>
+                                <div className="grid grid-cols-2 gap-3 mt-2">
+                                    <DetailItem icon={<UserIcon className="w-6 h-6"/>} label="ناڤێ تومەتباری" value={suspect.name} />
+                                    <DetailItem icon={<CalendarIcon className="w-6 h-6"/>} label="ژدایـــكبون" value={suspect.birthdate} />
+                                    <DetailItem icon={<PhoneIcon className="w-6 h-6"/>} label="ژمارا موبایلي" value={suspect.phone} />
+                                    <DetailItem icon={<MapPinIcon className="w-6 h-6"/>} label="ئاكنجی بوون" value={suspect.address} />
+                                    <DetailItem icon={<UsersIcon className="w-6 h-6"/>} label="بارێ خێزانی" value={suspect.maritalStatus} />
+                                    <DetailItem icon={<BriefcaseIcon className="w-6 h-6"/>} label="كارێ وی" value={suspect.job} />
+                                    <DetailItem icon={<LockClosedIcon className="w-6 h-6"/>} label="زیندانكرن" value={suspect.prison} />
+                                </div>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-blue-400 mb-2 pb-2 border-b border-blue-500/30">پێزانینێن رویدانێ</h3>
+                                <div className="grid grid-cols-2 gap-3 mt-2">
+                                    <DetailItem icon={<BookmarkIcon className="w-6 h-6 text-red-400"/>} label="جورێ ئاریشێ" value={suspect.problemType} />
+                                    <DetailItem icon={<MapPinIcon className="w-6 h-6"/>} label="جهێ ئاریشێ" value={suspect.problemLocation} />
+                                    <DetailItem icon={<ClockIcon className="w-6 h-6"/>} label="الوقت" value={`${suspect.timeFrom || '-'} - ${suspect.timeTo || '-'}`} />
+                                    <DetailItem icon={<ClockIcon className="w-6 h-6 text-yellow-400"/>} label="الفترة" value={suspect.period} />
+                                    <DetailItem icon={<UserIcon className="w-6 h-6"/>} label="ناڤێ شوفێری" value={suspect.driverName} />
+                                    <DetailItem icon={<HashtagIcon className="w-6 h-6"/>} label="خالا" value={suspect.point} />
+                                </div>
+                                <div className="mt-4 p-3 bg-green-800/50 rounded-lg border border-green-600/50">
+                                    <DetailItem icon={<BookmarkIcon className="w-6 h-6 text-green-400"/>} label="رەوانەكرن بـــو" value={suspect.sentTo} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="col-span-4 p-4 bg-black/30 rounded-lg border border-gray-700 flex flex-col items-center justify-center gap-4">
+                            <div className="w-56 h-72 bg-gray-700 rounded-md overflow-hidden border-4 border-blue-600/70 flex items-center justify-center">
+                                {suspect.photo ? <img src={suspect.photo} alt="صورة المتهم" className="w-full h-full object-cover" /> : <CameraIcon className="w-20 h-20 text-gray-500"/>}
+                            </div>
+                            <div className="text-center">
+                                <p className="text-xs text-gray-400">ناڤێ تومەتباری</p>
+                                <p className="font-bold text-xl">{suspect.name}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-black/40 p-2 text-center text-xs text-gray-400 border-t border-blue-800/60 flex items-center justify-center gap-2">
+                        <ClockIcon className="w-4 h-4" />
+                        <span>مێژویا توماركرنا رویدانێ: {formattedDate} - {formattedTime}</span>
+                    </div>
+                </div>
+            );
+        });
         
+        const IncidentCard = forwardRef(({ incident }, ref) => {
+            const creationDate = new Date(incident.date).toLocaleDateString('en-CA'); // YYYY-MM-DD
+            const creationTime = new Date(incident.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // HH:MM
+
+            return (
+                <div ref={ref} className="w-[1000px] bg-[#0d1117] text-white font-sans rounded-xl overflow-hidden shadow-2xl border border-blue-900/50">
+                    <div className="p-4 border-b border-blue-800/60">
+                        <h2 className="text-3xl font-bold text-center text-blue-400">توماری ئاریشە</h2>
+                    </div>
+
+                    <div className="grid grid-cols-12 gap-4 p-4">
+                        <div className="col-span-4 p-4 bg-black/30 rounded-lg border border-gray-700">
+                            <h3 className="text-xl font-bold text-blue-400 mb-4 pb-2 border-b border-blue-500/30">پێزانینێن رویدانێ</h3>
+                            <div className="space-y-3">
+                                <DetailItem icon={<BookmarkIcon className="w-6 h-6"/>} label="جورێ ئاریشێ" value={incident.caseInfo.issueType} />
+                                <DetailItem icon={<UserIcon className="w-6 h-6"/>} label="ناڤێ شوفێری" value={incident.caseInfo.driverName} />
+                                <DetailItem icon={<MapPinIcon className="w-6 h-6"/>} label="جهێ ئاریشێ" value={incident.caseInfo.location} />
+                                <DetailItem icon={<HashtagIcon className="w-6 h-6"/>} label="خالا" value={incident.caseInfo.point} />
+                                <DetailItem icon={<ClockIcon className="w-6 h-6"/>} label="دەمژمێر" value={`${incident.caseInfo.timeFrom || '-'} - ${incident.caseInfo.timeTo || '-'} (${incident.caseInfo.period})`} />
+                            </div>
+                            <div className="mt-4 p-3 bg-green-800/50 rounded-lg border border-green-600/50">
+                                <DetailItem icon={<BookmarkIcon className="w-6 h-6 text-green-400"/>} label="رەوانەكرن بـــو" value={incident.caseInfo.sentTo} />
+                            </div>
+                        </div>
+                        <div className="col-span-8 p-4 bg-black/30 rounded-lg border border-gray-700">
+                            <h3 className="text-xl font-bold text-blue-400 mb-4 pb-2 border-b border-blue-500/30">کەسێن تێدا</h3>
+                            <div className="space-y-4">
+                                {incident.persons.map((person) => (
+                                    <div key={person.id} className="bg-slate-800/80 p-3 rounded-lg flex items-center gap-4 border border-gray-600/80">
+                                        <div className="relative flex-shrink-0">
+                                            <div className="w-32 h-40 bg-gray-700 rounded-md overflow-hidden border-2 border-blue-600/70 flex items-center justify-center">
+                                                {person.photo ? <img src={person.photo} alt={person.name} className="w-full h-full object-cover" /> : <CameraIcon className="w-12 h-12 text-gray-500" />}
+                                            </div>
+                                            <span className={`absolute top-0 right-0 px-3 py-1 text-sm font-bold text-white rounded-bl-lg ${person.type === 'تاوانبار' ? 'bg-red-600' : 'bg-green-600'}`}>{person.type}</span>
+                                        </div>
+                                        <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                                            <div className="col-span-2 flex items-center gap-3">
+                                                <IconWrapper><UserIcon /></IconWrapper>
+                                                <div>
+                                                    <p className="text-xs text-gray-400">ناڤ</p>
+                                                    <p className="font-bold text-base">{person.name}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <IconWrapper><CalendarIcon /></IconWrapper>
+                                                <div>
+                                                    <p className="text-xs text-gray-400">ژدایکبون</p>
+                                                    <p>{person.birthdate || '--'}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <IconWrapper><PhoneIcon /></IconWrapper>
+                                                <div>
+                                                    <p className="text-xs text-gray-400">موبایل</p>
+                                                    <p>{person.phone || '--'}</p>
+                                                </div>
+                                            </div>
+                                            <div className="col-span-2 flex items-center gap-3">
+                                                <IconWrapper><MapPinIcon /></IconWrapper>
+                                                <div>
+                                                    <p className="text-xs text-gray-400">ئاكنجی بوون</p>
+                                                    <p>{person.address || '--'}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-black/40 p-2 text-center text-xs text-gray-400 border-t border-blue-800/60 flex items-center justify-center gap-2">
+                        <ClockIcon className="w-4 h-4" />
+                        <span>تم إنشاء هذه البطاقة في: {creationDate} م / {creationTime}</span>
+                    </div>
+                </div>
+            );
+        });
+
         // --- From components/Header.tsx ---
         const Header = ({ currentPage, setCurrentPage }) => {
           const navLinkClasses = (page) =>
-            `px-4 py-2 rounded-md text-sm sm:text-base font-medium transition-colors duration-300 ${
+            `px-3 py-2 sm:px-4 rounded-md text-sm sm:text-base font-medium transition-colors duration-300 ${
               currentPage === page
                 ? 'bg-blue-600 text-white shadow-lg'
                 : 'text-gray-300 hover:bg-gray-700 hover:text-white'
             }`;
 
           return (
-            <header className="bg-gray-800 shadow-md">
+            <header className="bg-gray-800 shadow-md sticky top-0 z-10">
               <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                   <div className="flex items-center">
                     <h1 className="text-xl sm:text-2xl font-bold text-white">نظام التسجيل</h1>
                   </div>
-                  <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                  <div className="flex items-center space-x-2 sm:space-x-4 rtl:space-x-reverse">
                     <button
                       onClick={() => setCurrentPage('suspect')}
                       className={navLinkClasses('suspect')}
                     >
-                      توماركرنا تومەتباری
+                      تومەتباری
                     </button>
                     <button
                       onClick={() => setCurrentPage('incident')}
                       className={navLinkClasses('incident')}
                     >
-                      توماری ئاریشە
+                      ئاریشە
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage('records')}
+                      className={navLinkClasses('records')}
+                    >
+                      سجلات
                     </button>
                   </div>
                 </div>
@@ -375,74 +520,11 @@
             const pointOptions = ["100", "101", "102", "103", "105", "106", "107", "108", "109", "110", "111", "112"];
             const sentToOptions = ["بنگەهێ پولیسێن كارێز", "بنگەهێ پولیسێن زاخو", "بنگەهێ پولیسێن سێمالكا", "بنگەهێ پولیسێن دەلال", "بنگەهێ پولیسێن بێدارێ", "بنگەهێ پولیسێن نیو زاخو", "بنگەهێ پولیسێن رزگاری", "رێڤەبەریا پولیسێن زاخو", "توندوتیژیا زاخو", "نەخوشخانا زاخو", "دەستێ سەمیانا", "مكافحا زاخو", "مكافحا بێدارێ", "ئاسايشا زاخو", "ئاگرڤەمراندنا زاخو", "گرتیخانا زاخو", "هاتوچووا زاخو"];
 
-            const SuspectCard = forwardRef(({ suspect }, ref) => {
-                const registrationDate = new Date(suspect.date);
-                const formattedDate = registrationDate.toLocaleDateString('ar-IQ');
-                const formattedTime = registrationDate.toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit', hour12: true });
-
-                return (
-                    <div ref={ref} id="suspect-card-content" className="w-[1000px] bg-[#0d1117] text-white font-sans rounded-xl overflow-hidden shadow-2xl border border-blue-900/50">
-                        <div className="p-4 border-b border-blue-800/60">
-                            <h2 className="text-3xl font-bold text-center text-blue-400">توماركرنا تومەتباری</h2>
-                        </div>
-                        
-                        <div className="grid grid-cols-12 gap-4 p-4">
-                            <div className="col-span-8 p-4 bg-black/30 rounded-lg border border-gray-700 space-y-4">
-                                <div>
-                                    <h3 className="text-xl font-bold text-blue-400 mb-2 pb-2 border-b border-blue-500/30">زانیاری کەسی</h3>
-                                    <div className="grid grid-cols-2 gap-3 mt-2">
-                                        <DetailItem icon={<UserIcon className="w-6 h-6"/>} label="ناڤێ تومەتباری" value={suspect.name} />
-                                        <DetailItem icon={<CalendarIcon className="w-6 h-6"/>} label="ژدایـــكبون" value={suspect.birthdate} />
-                                        <DetailItem icon={<PhoneIcon className="w-6 h-6"/>} label="ژمارا موبایلي" value={suspect.phone} />
-                                        <DetailItem icon={<MapPinIcon className="w-6 h-6"/>} label="ئاكنجی بوون" value={suspect.address} />
-                                        <DetailItem icon={<UsersIcon className="w-6 h-6"/>} label="بارێ خێزانی" value={suspect.maritalStatus} />
-                                        <DetailItem icon={<BriefcaseIcon className="w-6 h-6"/>} label="كارێ وی" value={suspect.job} />
-                                        <DetailItem icon={<LockClosedIcon className="w-6 h-6"/>} label="زیندانكرن" value={suspect.prison} />
-                                    </div>
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-blue-400 mb-2 pb-2 border-b border-blue-500/30">پێزانینێن رویدانێ</h3>
-                                    <div className="grid grid-cols-2 gap-3 mt-2">
-                                        <DetailItem icon={<BookmarkIcon className="w-6 h-6 text-red-400"/>} label="جورێ ئاریشێ" value={suspect.problemType} />
-                                        <DetailItem icon={<MapPinIcon className="w-6 h-6"/>} label="جهێ ئاریشێ" value={suspect.problemLocation} />
-                                        <DetailItem icon={<ClockIcon className="w-6 h-6"/>} label="الوقت" value={`${suspect.timeFrom || '-'} - ${suspect.timeTo || '-'}`} />
-                                        <DetailItem icon={<ClockIcon className="w-6 h-6 text-yellow-400"/>} label="الفترة" value={suspect.period} />
-                                        <DetailItem icon={<UserIcon className="w-6 h-6"/>} label="ناڤێ شوفێری" value={suspect.driverName} />
-                                        <DetailItem icon={<HashtagIcon className="w-6 h-6"/>} label="خالا" value={suspect.point} />
-                                    </div>
-                                    <div className="mt-4 p-3 bg-green-800/50 rounded-lg border border-green-600/50">
-                                        <DetailItem icon={<BookmarkIcon className="w-6 h-6 text-green-400"/>} label="رەوانەكرن بـــو" value={suspect.sentTo} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="col-span-4 p-4 bg-black/30 rounded-lg border border-gray-700 flex flex-col items-center justify-center gap-4">
-                                <div className="w-56 h-72 bg-gray-700 rounded-md overflow-hidden border-4 border-blue-600/70 flex items-center justify-center">
-                                    {suspect.photo ? <img src={suspect.photo} alt="صورة المتهم" className="w-full h-full object-cover" /> : <CameraIcon className="w-20 h-20 text-gray-500"/>}
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-xs text-gray-400">ناڤێ تومەتباری</p>
-                                    <p className="font-bold text-xl">{suspect.name}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-black/40 p-2 text-center text-xs text-gray-400 border-t border-blue-800/60 flex items-center justify-center gap-2">
-                            <ClockIcon className="w-4 h-4" />
-                            <span>مێژویا توماركرنا رویدانێ: {formattedDate} - {formattedTime}</span>
-                        </div>
-                    </div>
-                );
-            });
-
-
             const [suspects, setSuspects] = useLocalStorage('suspects', []);
             const [formData, setFormData] = useState(emptySuspect);
             const [generatedSuspect, setGeneratedSuspect] = useState(null);
             const cardRef = useRef(null);
             const topRef = useRef(null);
-            const [searchTerm, setSearchTerm] = useState('');
-            const [sortBy, setSortBy] = useState('date-desc');
 
             const handleDownload = useCallback((suspect) => {
                 if (!cardRef.current) return;
@@ -515,29 +597,12 @@
                     if(fileInput) fileInput.value = "";
                 }
             };
-
-            const handleSelectSuspect = (suspect) => {
-                setGeneratedSuspect(suspect);
-            };
-
+            
             useEffect(() => {
                 if (generatedSuspect) {
                     topRef.current?.scrollIntoView({ behavior: 'smooth' });
                 }
             }, [generatedSuspect]);
-
-            const filteredAndSortedSuspects = useMemo(() => {
-                return suspects
-                    .filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                    .sort((a, b) => {
-                        switch (sortBy) {
-                            case 'name-asc': return a.name.localeCompare(b.name, 'ar');
-                            case 'name-desc': return b.name.localeCompare(a.name, 'ar');
-                            case 'date-asc': return new Date(a.date).getTime() - new Date(b.date).getTime();
-                            default: return new Date(b.date).getTime() - new Date(a.date).getTime();
-                        }
-                    });
-            }, [suspects, searchTerm, sortBy]);
 
             return (
                 <div className="space-y-8" ref={topRef}>
@@ -556,7 +621,7 @@
                     )}
                     
                     <div className="bg-gray-800 p-6 rounded-lg shadow-xl">
-                        <h2 className="text-2xl font-bold mb-6 text-blue-400 border-b-2 border-blue-500 pb-2">سجل جديد</h2>
+                        <h2 className="text-2xl font-bold mb-6 text-blue-400 border-b-2 border-blue-500 pb-2">توماركرنا تومەتباری</h2>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="flex flex-col items-center gap-4">
                                 <div className="w-40 h-40 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden border-2 border-gray-500">
@@ -602,42 +667,6 @@
                             </div>
                         </form>
                     </div>
-
-                    {suspects.length > 0 && (
-                        <div className="bg-gray-800 p-6 rounded-lg shadow-xl">
-                            <h2 className="text-2xl font-bold mb-4 text-blue-400">قائمة السجلات</h2>
-                            <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                                <div className="flex-grow w-full sm:w-auto">
-                                   <InputField id="search-suspects" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="بحث حسب اسم المتهم..." icon={<SearchIcon />} />
-                                </div>
-                                <div className="flex items-center gap-2 w-full sm:w-auto">
-                                    <label htmlFor="sort-suspects" className="text-gray-300 whitespace-nowrap">ترتيب حسب:</label>
-                                    <select id="sort-suspects" value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                                        <option value="date-desc">الأحدث أولاً</option>
-                                        <option value="date-asc">الأقدم أولاً</option>
-                                        <option value="name-asc">الاسم (أ-ي)</option>
-                                        <option value="name-desc">الاسم (ي-أ)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <ul className="space-y-3 max-h-96 overflow-y-auto">
-                                {filteredAndSortedSuspects.map(s => (
-                                    <li key={s.id} onClick={() => handleSelectSuspect(s)} className="bg-gray-700 p-4 rounded-lg flex justify-between items-center cursor-pointer hover:bg-gray-600 transition-colors">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-gray-600 rounded-full flex-shrink-0 overflow-hidden">
-                                                {s.photo && <img src={s.photo} alt={s.name} className="w-full h-full object-cover" />}
-                                            </div>
-                                            <div>
-                                                <p className="font-semibold">{s.name}</p>
-                                                <p className="text-sm text-gray-400">{s.problemType}</p>
-                                            </div>
-                                        </div>
-                                        <span className="text-xs text-gray-500">{new Date(s.date).toLocaleDateString('ar-IQ')}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
                 </div>
             );
         };
@@ -653,94 +682,12 @@
             const pointOptions = ["100", "101", "102", "103", "105", "106", "107", "108", "109", "110", "111", "112"];
             const sentToOptions = ["بنگەهێ پولیسێن كارێز", "بنگەهێ پولیسێن زاخو", "بنگەهێ پولیسێن سێمالكا", "بنگەهێ پولیسێن دەلال", "بنگەهێ پولیسێن بێدارێ", "بنگەهێ پولیسێن نیو زاخو", "بنگەهێ پولیسێن رزگاری", "رێڤەبەریا پولیسێن زاخو", "توندوتیژیا زاخو", "نەخوشخانا زاخو", "دەستێ سەمیانا", "مكافحا زاخو", "مكافحا بێدارێ", "ئاسايشا زاخو", "ئاگرڤەمراندنا زاخو", "گرتیخانا زاخو", "هاتوچووا زاخو"];
 
-            const IncidentCard = forwardRef(({ incident }, ref) => {
-                const creationDate = new Date(incident.date).toLocaleDateString('en-CA'); // YYYY-MM-DD
-                const creationTime = new Date(incident.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // HH:MM
-
-                return (
-                    <div ref={ref} className="w-[1000px] bg-[#0d1117] text-white font-sans rounded-xl overflow-hidden shadow-2xl border border-blue-900/50">
-                        <div className="p-4 border-b border-blue-800/60">
-                            <h2 className="text-3xl font-bold text-center text-blue-400">توماری ئاریشە</h2>
-                        </div>
-
-                        <div className="grid grid-cols-12 gap-4 p-4">
-                            <div className="col-span-8 p-4 bg-black/30 rounded-lg border border-gray-700">
-                                <h3 className="text-xl font-bold text-blue-400 mb-4 pb-2 border-b border-blue-500/30">کەسێن تێدا</h3>
-                                <div className="space-y-4">
-                                    {incident.persons.map((person) => (
-                                        <div key={person.id} className="bg-slate-800/80 p-3 rounded-lg flex items-center gap-4 border border-gray-600/80">
-                                            <div className="relative flex-shrink-0">
-                                                <div className="w-32 h-40 bg-gray-700 rounded-md overflow-hidden border-2 border-blue-600/70 flex items-center justify-center">
-                                                    {person.photo ? <img src={person.photo} alt={person.name} className="w-full h-full object-cover" /> : <CameraIcon className="w-12 h-12 text-gray-500" />}
-                                                </div>
-                                                <span className={`absolute top-0 right-0 px-3 py-1 text-sm font-bold text-white rounded-bl-lg ${person.type === 'تاوانبار' ? 'bg-red-600' : 'bg-green-600'}`}>{person.type}</span>
-                                            </div>
-                                            <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                                                <div className="col-span-2 flex items-center gap-3">
-                                                    <IconWrapper><UserIcon /></IconWrapper>
-                                                    <div>
-                                                        <p className="text-xs text-gray-400">ناڤ</p>
-                                                        <p className="font-bold text-base">{person.name}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <IconWrapper><CalendarIcon /></IconWrapper>
-                                                    <div>
-                                                        <p className="text-xs text-gray-400">ژدایکبون</p>
-                                                        <p>{person.birthdate || '--'}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <IconWrapper><PhoneIcon /></IconWrapper>
-                                                    <div>
-                                                        <p className="text-xs text-gray-400">موبایل</p>
-                                                        <p>{person.phone || '--'}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="col-span-2 flex items-center gap-3">
-                                                    <IconWrapper><MapPinIcon /></IconWrapper>
-                                                    <div>
-                                                        <p className="text-xs text-gray-400">ئاكنجی بوون</p>
-                                                        <p>{person.address || '--'}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                             <div className="col-span-4 p-4 bg-black/30 rounded-lg border border-gray-700">
-                                <h3 className="text-xl font-bold text-blue-400 mb-4 pb-2 border-b border-blue-500/30">پێزانینێن رویدانێ</h3>
-                                <div className="space-y-3">
-                                    <DetailItem icon={<BookmarkIcon className="w-6 h-6"/>} label="جورێ ئاریشێ" value={incident.caseInfo.issueType} />
-                                    <DetailItem icon={<UserIcon className="w-6 h-6"/>} label="ناڤێ شوفێری" value={incident.caseInfo.driverName} />
-                                    <DetailItem icon={<MapPinIcon className="w-6 h-6"/>} label="جهێ ئاریشێ" value={incident.caseInfo.location} />
-                                    <DetailItem icon={<HashtagIcon className="w-6 h-6"/>} label="خالا" value={incident.caseInfo.point} />
-                                    <DetailItem icon={<ClockIcon className="w-6 h-6"/>} label="دەمژمێر" value={`${incident.caseInfo.timeFrom || '-'} - ${incident.caseInfo.timeTo || '-'} (${incident.caseInfo.period})`} />
-                                </div>
-                                <div className="mt-4 p-3 bg-green-800/50 rounded-lg border border-green-600/50">
-                                    <DetailItem icon={<BookmarkIcon className="w-6 h-6 text-green-400"/>} label="رەوانەكرن بـــو" value={incident.caseInfo.sentTo} />
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div className="bg-black/40 p-2 text-center text-xs text-gray-400 border-t border-blue-800/60 flex items-center justify-center gap-2">
-                            <ClockIcon className="w-4 h-4" />
-                            <span>تم إنشاء هذه البطاقة في: {creationDate} م / {creationTime}</span>
-                        </div>
-                    </div>
-                );
-            });
-
-
             const [incidents, setIncidents] = useLocalStorage('incidents', []);
             const [caseInfo, setCaseInfo] = useState(emptyCaseInfo);
             const [persons, setPersons] = useState([]);
             const [generatedIncident, setGeneratedIncident] = useState(null);
             const cardRef = useRef(null);
             const topRef = useRef(null);
-            const [searchTerm, setSearchTerm] = useState('');
-            const [sortBy, setSortBy] = useState('date-desc');
 
             const handleDownload = useCallback((incident) => {
                 if (!cardRef.current) return;
@@ -814,29 +761,12 @@
                     setPersons([]);
                 }
             };
-
-            const handleSelectIncident = (incident) => {
-                setGeneratedIncident(incident);
-            };
-
+            
             useEffect(() => {
                 if (generatedIncident) {
                     topRef.current?.scrollIntoView({ behavior: 'smooth' });
                 }
             }, [generatedIncident]);
-
-            const filteredAndSortedIncidents = useMemo(() => {
-                return incidents
-                    .filter(i => i.caseInfo.issueType.toLowerCase().includes(searchTerm.toLowerCase()))
-                    .sort((a, b) => {
-                        switch (sortBy) {
-                            case 'type-asc': return a.caseInfo.issueType.localeCompare(b.caseInfo.issueType, 'ar');
-                            case 'type-desc': return b.caseInfo.issueType.localeCompare(a.caseInfo.issueType, 'ar');
-                            case 'date-asc': return new Date(a.date).getTime() - new Date(b.date).getTime();
-                            default: return new Date(b.date).getTime() - new Date(a.date).getTime();
-                        }
-                    });
-            }, [incidents, searchTerm, sortBy]);
 
             return (
                 <div className="space-y-8" ref={topRef}>
@@ -854,7 +784,7 @@
                         </div>
                     )}
                     <div className="bg-gray-800 p-6 rounded-lg shadow-xl">
-                        <h2 className="text-2xl font-bold mb-6 text-blue-400 border-b-2 border-blue-500 pb-2">تسجيل قضية جديدة</h2>
+                        <h2 className="text-2xl font-bold mb-6 text-blue-400 border-b-2 border-blue-500 pb-2">توماری ئاریشە</h2>
                         <form onSubmit={handleSubmit} className="space-y-8">
                             <div className="space-y-6">
                                 {persons.map((person, index) => (
@@ -912,37 +842,169 @@
                             <div className="text-center pt-4"><Button type="submit" text="خەزنكرنا كارتێ" className="w-full md:w-auto" /></div>
                         </form>
                     </div>
+                </div>
+            );
+        };
 
-                    {incidents.length > 0 && (
-                        <div className="bg-gray-800 p-6 rounded-lg shadow-xl">
-                            <h2 className="text-2xl font-bold mb-4 text-blue-400">القضايا المسجلة</h2>
-                            <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                                <div className="flex-grow w-full sm:w-auto">
-                                   <InputField id="search-incidents" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="بحث حسب نوع القضية..." icon={<SearchIcon />} />
-                                </div>
-                                <div className="flex items-center gap-2 w-full sm:w-auto">
-                                    <label htmlFor="sort-incidents" className="text-gray-300 whitespace-nowrap">ترتيب حسب:</label>
-                                    <select id="sort-incidents" value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                                        <option value="date-desc">الأحدث أولاً</option>
-                                        <option value="date-asc">الأقدم أولاً</option>
-                                        <option value="type-asc">نوع القضية (أ-ي)</option>
-                                        <option value="type-desc">نوع القضية (ي-أ)</option>
-                                    </select>
-                                </div>
+        // --- From pages/RecordsPage.tsx ---
+        const RecordsPage = () => {
+            const [suspects, setSuspects] = useLocalStorage('suspects', []);
+            const [incidents, setIncidents] = useLocalStorage('incidents', []);
+            const [selectedRecord, setSelectedRecord] = useState(null);
+            const cardRef = useRef(null);
+            const topRef = useRef(null);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [sortBy, setSortBy] = useState('date-desc');
+            
+            useEffect(() => {
+                if (selectedRecord) {
+                    topRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, [selectedRecord]);
+
+            const handleDelete = (id, type) => {
+                if (!window.confirm('هل أنت متأكد أنك تريد حذف هذا السجل بشكل دائم؟')) return;
+                if (type === 'suspect') {
+                    setSuspects(prev => prev.filter(s => s.id !== id));
+                } else {
+                    setIncidents(prev => prev.filter(i => i.id !== id));
+                }
+                setSelectedRecord(null);
+            };
+
+            const handleDownload = useCallback(() => {
+                if (!cardRef.current || !selectedRecord) return;
+                const isSuspect = selectedRecord.type === 'suspect';
+                const title = isSuspect ? selectedRecord.data.name : selectedRecord.data.caseInfo.issueType;
+                const fileName = `${isSuspect ? 'بطاقة-متهم' : 'قضية'}-${title.replace(/ /g, '_')}.png`;
+
+                window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 3, backgroundColor: '#0d1117' })
+                    .then((dataUrl) => {
+                        const link = document.createElement('a');
+                        link.download = fileName;
+                        link.href = dataUrl;
+                        link.click();
+                    })
+                    .catch((err) => console.error('oops, something went wrong!', err));
+            }, [selectedRecord]);
+
+            const handleShare = async () => {
+              if (!cardRef.current || !selectedRecord) return;
+              const isSuspect = selectedRecord.type === 'suspect';
+              const title = isSuspect ? selectedRecord.data.name : selectedRecord.data.caseInfo.issueType;
+              const text = isSuspect ? `معلومات المتهم: ${title}` : `تفاصيل قضية: ${title}`;
+              const fileName = `${isSuspect ? 'بطاقة-متهم' : 'قضية'}-${title.replace(/ /g, '_')}.png`;
+              
+              try {
+                const dataUrl = await window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 2, backgroundColor: '#0d1117' });
+                const res = await fetch(dataUrl);
+                const blob = await res.blob();
+                const file = new File([blob], fileName, { type: 'image/png' });
+
+                if (navigator.share && navigator.canShare({ files: [file] })) {
+                  await navigator.share({ title: isSuspect ? 'بطاقة متهم' : 'بطاقة قضية', text, files: [file] });
+                } else {
+                  alert('متصفحك لا يدعم المشاركة المباشرة. سيتم تحميل الصورة لتتمكن من مشاركتها يدويًا.');
+                  handleDownload();
+                }
+              } catch (error) {
+                console.error('Error sharing card:', error);
+                alert('حدث خطأ أثناء محاولة مشاركة البطاقة.');
+              }
+            };
+            
+            const allRecords = useMemo(() => {
+                const suspectRecords = suspects.map(s => ({
+                    id: s.id, type: 'suspect', date: s.date, title: s.name,
+                    subTitle: s.problemType, photo: s.photo, data: s,
+                }));
+                const incidentRecords = incidents.map(i => ({
+                    id: i.id, type: 'incident', date: i.date, title: i.caseInfo.issueType,
+                    subTitle: `الأشخاص: ${i.persons.length}`, photo: i.persons[0]?.photo || null, data: i,
+                }));
+                return [...suspectRecords, ...incidentRecords];
+            }, [suspects, incidents]);
+
+            const filteredAndSortedRecords = useMemo(() => {
+                return allRecords
+                    .filter(r => r.title.toLowerCase().includes(searchTerm.toLowerCase()) || r.subTitle.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .sort((a, b) => {
+                        switch (sortBy) {
+                            case 'date-asc': return new Date(a.date).getTime() - new Date(b.date).getTime();
+                            case 'title-asc': return a.title.localeCompare(b.title, 'ar');
+                            case 'title-desc': return b.title.localeCompare(a.title, 'ar');
+                            default: return new Date(b.date).getTime() - new Date(a.date).getTime();
+                        }
+                    });
+            }, [allRecords, searchTerm, sortBy]);
+
+            return (
+                <div className="space-y-8" ref={topRef}>
+                    {selectedRecord && (
+                        <div className="bg-gray-800 p-6 rounded-lg shadow-xl flex flex-col items-center">
+                            <h2 className="text-xl font-bold text-white mb-4">تفاصيل السجل</h2>
+                            <div className="w-full overflow-x-auto py-2">
+                                {selectedRecord.type === 'suspect' ? 
+                                    <SuspectCard ref={cardRef} suspect={selectedRecord.data} /> : 
+                                    <IncidentCard ref={cardRef} incident={selectedRecord.data} />}
                             </div>
-                            <ul className="space-y-3 max-h-96 overflow-y-auto">
-                                {filteredAndSortedIncidents.map(i => (
-                                    <li key={i.id} onClick={() => handleSelectIncident(i)} className="bg-gray-700 p-4 rounded-lg flex justify-between items-center cursor-pointer hover:bg-gray-600 transition-colors">
-                                        <div>
-                                            <p className="font-semibold">{i.caseInfo.issueType}</p>
-                                            <p className="text-sm text-gray-400">الأشخاص: {i.persons.length}</p>
+                            <div className="mt-6 flex flex-wrap gap-4 justify-center">
+                                <Button onClick={() => setSelectedRecord(null)} icon={<UserPlusIcon />} text="إخفاء التفاصيل" className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-800" />
+                                <Button onClick={handleShare} icon={<WhatsAppIcon className="w-5 h-5 text-white"/>} text="مشاركة" className="bg-green-600 hover:bg-green-700 focus:ring-green-800" />
+                                <Button onClick={handleDownload} icon={<DownloadIcon />} text="حفظ البطاقة" />
+                                <Button onClick={() => handleDelete(selectedRecord.data.id, selectedRecord.type)} icon={<TrashIcon />} text="حذف" className="bg-red-600 hover:bg-red-700 focus:ring-red-800" />
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="bg-gray-800 p-6 rounded-lg shadow-xl">
+                        <h2 className="text-2xl font-bold mb-4 text-blue-400">جميع السجلات</h2>
+                        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                            <div className="flex-grow w-full sm:w-auto">
+                               <InputField id="search-records" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="ابحث بالاسم أو نوع القضية..." icon={<SearchIcon />} />
+                            </div>
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <label htmlFor="sort-records" className="text-gray-300 whitespace-nowrap">ترتيب حسب:</label>
+                                <select id="sort-records" value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                    <option value="date-desc">الأحدث أولاً</option>
+                                    <option value="date-asc">الأقدم أولاً</option>
+                                    <option value="title-asc">العنوان (أ-ي)</option>
+                                    <option value="title-desc">العنوان (ي-أ)</option>
+                                </select>
+                            </div>
+                        </div>
+                        {filteredAndSortedRecords.length > 0 ? (
+                            <ul className="space-y-3 max-h-[70vh] overflow-y-auto">
+                                {filteredAndSortedRecords.map(r => (
+                                    <li key={r.id} onClick={() => setSelectedRecord({type: r.type, data: r.data})} className="bg-gray-700 p-4 rounded-lg flex justify-between items-center cursor-pointer hover:bg-gray-600 transition-colors">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-gray-600 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center">
+                                                {r.photo ? <img src={r.photo} alt={r.title} className="w-full h-full object-cover" /> : (r.type === 'suspect' ? <UserIcon className="w-6 h-6 text-gray-400" /> : <BriefcaseIcon className="w-6 h-6 text-gray-400" />)}
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold">{r.title}</p>
+                                                <p className="text-sm text-gray-400">{r.subTitle}</p>
+                                            </div>
                                         </div>
-                                        <span className="text-xs text-gray-500">{new Date(i.date).toLocaleDateString('ar-IQ')}</span>
+                                        <div className="flex items-center gap-3">
+                                          <span className="text-xs text-gray-500">{new Date(r.date).toLocaleDateString('ar-IQ')}</span>
+                                          <button 
+                                            onClick={(e) => { e.stopPropagation(); handleDelete(r.id, r.type); }} 
+                                            className="p-2 rounded-full hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors"
+                                            aria-label="حذف السجل"
+                                          >
+                                            <TrashIcon className="w-5 h-5" />
+                                          </button>
+                                        </div>
                                     </li>
                                 ))}
                             </ul>
-                        </div>
-                    )}
+                        ) : (
+                           <div className="text-center py-10 text-gray-500">
+                               <p>لا توجد سجلات تطابق بحثك.</p>
+                           </div>
+                        )}
+                    </div>
                 </div>
             );
         };
@@ -957,6 +1019,7 @@
               <main className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto">
                 {currentPage === 'suspect' && <SuspectPage />}
                 {currentPage === 'incident' && <IncidentPage />}
+                {currentPage === 'records' && <RecordsPage />}
               </main>
               <footer className="text-center p-4 text-gray-500 text-sm">
                 نظام إدارة القضايا - تم إنشاؤه بواسطة مهندس frontend خبير
