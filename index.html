@@ -127,15 +127,19 @@
         // --- From hooks/useLocalStorage.ts ---
         function getStorageValue(key, defaultValue) {
           if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem(key);
-            if (saved) {
-              try {
-                const initial = JSON.parse(saved);
-                return initial;
-              } catch (error) {
-                console.error("Error parsing JSON from localStorage", error);
-                return defaultValue;
+            try {
+              const saved = localStorage.getItem(key);
+              if (saved) {
+                try {
+                  const initial = JSON.parse(saved);
+                  return initial;
+                } catch (error) {
+                  console.error("Error parsing JSON from localStorage", error);
+                  return defaultValue;
+                }
               }
+            } catch (error) {
+              console.error("Error accessing localStorage", error);
             }
           }
           return defaultValue;
@@ -147,7 +151,11 @@
           });
 
           useEffect(() => {
-            localStorage.setItem(key, JSON.stringify(value));
+            try {
+              localStorage.setItem(key, JSON.stringify(value));
+            } catch (error) {
+               console.error("Error accessing localStorage", error);
+            }
           }, [key, value]);
 
           return [value, setValue];
@@ -156,11 +164,11 @@
         // --- From components/Icons.tsx ---
         const IconWrapper = ({ children, className }) => <div className={`w-6 h-6 flex-shrink-0 text-blue-400 ${className}`}>{children}</div>;
         const DetailItem = ({ icon, label, value }) => (
-            <div className="flex items-start gap-3">
-                {icon}
+            <div className="flex items-center gap-3">
+                <div className="w-6 h-6 text-blue-400 flex-shrink-0">{icon}</div>
                 <div>
-                    <p className="text-gray-400 text-xs">{label}</p>
-                    <p className="font-semibold text-sm text-white">{value || '-'}</p>
+                    <p className="text-xs text-gray-400">{label}</p>
+                    <p className="font-semibold text-white">{value || '--'}</p>
                 </div>
             </div>
         );
@@ -328,60 +336,62 @@
                 const registrationDate = new Date(suspect.date);
                 const formattedDate = registrationDate.toLocaleDateString('ar-IQ');
                 const formattedTime = registrationDate.toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit', hour12: true });
+
                 return (
-                    <div ref={ref} id="suspect-card-content" className="w-full max-w-4xl bg-gradient-to-br from-gray-900 to-black rounded-2xl shadow-2xl overflow-hidden font-sans text-white border border-blue-800/50">
-                        <div className="bg-black/30 p-4 flex items-center justify-between border-b border-gray-700 backdrop-blur-sm">
-                            <h2 className="text-xl sm:text-2xl font-bold text-blue-300 tracking-wider">بەشێ پولیسێن هەوارهاتنێ</h2>
-                            <PoliceBadgeIcon className="w-10 h-10 text-blue-500" />
+                    <div ref={ref} id="suspect-card-content" className="w-[1000px] bg-[#0d1117] text-white font-sans rounded-xl overflow-hidden shadow-2xl border border-blue-900/50">
+                        <div className="p-4 border-b border-blue-800/60">
+                            <h2 className="text-3xl font-bold text-center text-blue-400">توماركرنا تومەتباری</h2>
                         </div>
-
-                        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="md:col-span-1 flex flex-col items-center text-center space-y-4">
-                                <div className="w-48 h-56 rounded-lg border-4 border-blue-500/50 shadow-lg flex items-center justify-center overflow-hidden bg-gray-800">
-                                    {suspect.photo ? <img src={suspect.photo} alt="صورة المتهم" className="w-full h-full object-cover" /> : <CameraIcon className="w-20 h-20 text-gray-500" />}
+                        
+                        <div className="grid grid-cols-12 gap-4 p-4">
+                            <div className="col-span-8 p-4 bg-black/30 rounded-lg border border-gray-700 space-y-4">
+                                <div>
+                                    <h3 className="text-xl font-bold text-blue-400 mb-2 pb-2 border-b border-blue-500/30">زانیاری کەسی</h3>
+                                    <div className="grid grid-cols-2 gap-3 mt-2">
+                                        <DetailItem icon={<UserIcon className="w-6 h-6"/>} label="ناڤێ تومەتباری" value={suspect.name} />
+                                        <DetailItem icon={<CalendarIcon className="w-6 h-6"/>} label="ژدایـــكبون" value={suspect.birthdate} />
+                                        <DetailItem icon={<PhoneIcon className="w-6 h-6"/>} label="ژمارا موبایلي" value={suspect.phone} />
+                                        <DetailItem icon={<MapPinIcon className="w-6 h-6"/>} label="ئاكنجی بوون" value={suspect.address} />
+                                        <DetailItem icon={<UsersIcon className="w-6 h-6"/>} label="بارێ خێزانی" value={suspect.maritalStatus} />
+                                        <DetailItem icon={<BriefcaseIcon className="w-6 h-6"/>} label="كارێ وی" value={suspect.job} />
+                                        <DetailItem icon={<LockClosedIcon className="w-6 h-6"/>} label="زیندانكرن" value={suspect.prison} />
+                                    </div>
                                 </div>
-                                <div className="w-full bg-gray-800/50 p-3 rounded-lg border border-gray-700">
-                                    <p className="text-gray-400 text-sm">ناڤێ تومەتباری</p>
-                                    <p className="font-bold text-xl text-blue-100">{suspect.name}</p>
+                                <div>
+                                    <h3 className="text-xl font-bold text-blue-400 mb-2 pb-2 border-b border-blue-500/30">پێزانینێن رویدانێ</h3>
+                                    <div className="grid grid-cols-2 gap-3 mt-2">
+                                        <DetailItem icon={<BookmarkIcon className="w-6 h-6 text-red-400"/>} label="جورێ ئاریشێ" value={suspect.problemType} />
+                                        <DetailItem icon={<MapPinIcon className="w-6 h-6"/>} label="جهێ ئاریشێ" value={suspect.problemLocation} />
+                                        <DetailItem icon={<ClockIcon className="w-6 h-6"/>} label="الوقت" value={`${suspect.timeFrom || '-'} - ${suspect.timeTo || '-'}`} />
+                                        <DetailItem icon={<ClockIcon className="w-6 h-6 text-yellow-400"/>} label="الفترة" value={suspect.period} />
+                                        <DetailItem icon={<UserIcon className="w-6 h-6"/>} label="ناڤێ شوفێری" value={suspect.driverName} />
+                                        <DetailItem icon={<HashtagIcon className="w-6 h-6"/>} label="خالا" value={suspect.point} />
+                                    </div>
+                                    <div className="mt-4 p-3 bg-green-800/50 rounded-lg border border-green-600/50">
+                                        <DetailItem icon={<BookmarkIcon className="w-6 h-6 text-green-400"/>} label="رەوانەكرن بـــو" value={suspect.sentTo} />
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="md:col-span-2 space-y-4">
-                                <h3 className="text-lg font-semibold text-blue-400 border-b border-blue-500/30 pb-2">زانیاری کەسی</h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <DetailItem icon={<IconWrapper><CalendarIcon /></IconWrapper>} label="ژدایـــكبون" value={suspect.birthdate} />
-                                    <DetailItem icon={<IconWrapper><PhoneIcon /></IconWrapper>} label="ژمارا موبایلي" value={suspect.phone} />
-                                    <DetailItem icon={<IconWrapper><MapPinIcon /></IconWrapper>} label="ئاكنجی بوون" value={suspect.address} />
-                                    <DetailItem icon={<IconWrapper><UsersIcon /></IconWrapper>} label="بارێ خێزانی" value={suspect.maritalStatus} />
-                                    <DetailItem icon={<IconWrapper><BriefcaseIcon /></IconWrapper>} label="كارێ وی" value={suspect.job} />
-                                    <DetailItem icon={<IconWrapper><LockClosedIcon /></IconWrapper>} label="زیندانكرن" value={suspect.prison} />
+                            <div className="col-span-4 p-4 bg-black/30 rounded-lg border border-gray-700 flex flex-col items-center justify-center gap-4">
+                                <div className="w-56 h-72 bg-gray-700 rounded-md overflow-hidden border-4 border-blue-600/70 flex items-center justify-center">
+                                    {suspect.photo ? <img src={suspect.photo} alt="صورة المتهم" className="w-full h-full object-cover" /> : <CameraIcon className="w-20 h-20 text-gray-500"/>}
                                 </div>
-                                <h3 className="text-lg font-semibold text-blue-400 border-b border-blue-500/30 pb-2 pt-4">پێزانینێن رویدانێ</h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                     <DetailItem icon={<IconWrapper><ClockIcon /></IconWrapper>} label="الوقت" value={`${suspect.timeFrom || '-'} - ${suspect.timeTo || '-'}`} />
-                                     <DetailItem icon={<IconWrapper className="text-yellow-400"><ClockIcon /></IconWrapper>} label="الفترة" value={suspect.period} />
-                                     <DetailItem icon={<IconWrapper><UserIcon /></IconWrapper>} label="ناڤێ شوفێری" value={suspect.driverName} />
-                                     <DetailItem icon={<IconWrapper><HashtagIcon /></IconWrapper>} label="خالا" value={suspect.point} />
-                                     <div className="sm:col-span-2"><DetailItem icon={<IconWrapper><MapPinIcon /></IconWrapper>} label="جهێ ئاریشێ" value={suspect.problemLocation} /></div>
-                                     <div className="bg-green-900/50 text-green-300 p-3 rounded-lg font-semibold flex items-start gap-3">
-                                        <IconWrapper className="text-green-400"><BookmarkIcon /></IconWrapper>
-                                        <div> <p className="text-green-200/80 text-xs">رەوانەكرن بـــو</p> <p>{suspect.sentTo || '-'}</p> </div>
-                                     </div>
-                                     <div className="bg-red-900/50 text-red-300 p-3 rounded-lg font-semibold flex items-start gap-3">
-                                        <IconWrapper className="text-red-400"><BookmarkIcon /></IconWrapper>
-                                        <div> <p className="text-red-200/80 text-xs">جورێ ئاریشێ</p> <p>{suspect.problemType || '-'}</p> </div>
-                                     </div>
+                                <div className="text-center">
+                                    <p className="text-xs text-gray-400">ناڤێ تومەتباری</p>
+                                    <p className="font-bold text-xl">{suspect.name}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-black/30 p-3 text-center text-xs text-gray-400 border-t border-gray-700 flex items-center justify-center gap-2 backdrop-blur-sm">
+                        <div className="bg-black/40 p-2 text-center text-xs text-gray-400 border-t border-blue-800/60 flex items-center justify-center gap-2">
                             <ClockIcon className="w-4 h-4" />
                             <span>مێژویا توماركرنا رویدانێ: {formattedDate} - {formattedTime}</span>
                         </div>
                     </div>
                 );
             });
+
 
             const [suspects, setSuspects] = useLocalStorage('suspects', []);
             const [formData, setFormData] = useState(emptySuspect);
@@ -393,7 +403,7 @@
 
             const handleDownload = useCallback((suspect) => {
                 if (!cardRef.current) return;
-                window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 3 })
+                window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 3, backgroundColor: '#0d1117' })
                     .then((dataUrl) => {
                         const link = document.createElement('a');
                         link.download = `بطاقة-متهم-${suspect.name.replace(/ /g, '_')}.png`;
@@ -407,7 +417,7 @@
               if (!cardRef.current) return;
               const fileName = `بطاقة-متهم-${suspect.name.replace(/ /g, '_')}.png`;
               try {
-                const dataUrl = await window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 2 });
+                const dataUrl = await window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 2, backgroundColor: '#0d1117' });
                 const res = await fetch(dataUrl);
                 const blob = await res.blob();
                 const file = new File([blob], fileName, { type: 'image/png' });
@@ -476,7 +486,9 @@
                     {generatedSuspect && (
                         <div className="bg-gray-800 p-6 rounded-lg shadow-xl flex flex-col items-center">
                             <h2 className="text-xl font-bold text-white mb-4">تم إنشاء البطاقة بنجاح</h2>
-                            <SuspectCard ref={cardRef} suspect={generatedSuspect} />
+                            <div className="w-full overflow-x-auto py-2">
+                                <SuspectCard ref={cardRef} suspect={generatedSuspect} />
+                            </div>
                             <div className="mt-6 flex flex-wrap gap-4 justify-center">
                                 <Button onClick={() => setGeneratedSuspect(null)} icon={<UserPlusIcon />} text="إضافة متهم جديد" className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-800" />
                                 <Button onClick={() => handleShare(generatedSuspect)} icon={<WhatsAppIcon className="w-5 h-5 text-white"/>} text="مشاركة" className="bg-green-600 hover:bg-green-700 focus:ring-green-800" />
@@ -584,55 +596,54 @@
             const sentToOptions = ["بنگەهێ پولیسێن كارێز", "بنگەهێ پولیسێن زاخو", "بنگەهێ پولیسێن سێمالكا", "بنگەهێ پولیسێن دەلال", "بنگەهێ پولیسێن بێدارێ", "بنگەهێ پولیسێن نیو زاخو", "بنگەهێ پولیسێن رزگاری", "رێڤەبەریا پولیسێن زاخو", "توندوتیژیا زاخو", "نەخوشخانا زاخو", "دەستێ سەمیانا", "مكافحا زاخو", "مكافحا بێدارێ", "ئاسايشا زاخو", "ئاگرڤەمراندنا زاخو", "گرتیخانا زاخو", "هاتوچووا زاخو"];
 
             const IncidentCard = forwardRef(({ incident }, ref) => {
-                const timestamp = new Date(incident.date).toLocaleString('ar-IQ');
-                return (
-                    <div ref={ref} className="w-full max-w-6xl bg-gradient-to-br from-gray-900 to-black rounded-2xl shadow-2xl overflow-hidden font-sans text-white border border-blue-800/50">
-                        <div className="bg-black/30 p-4 flex items-center justify-between border-b border-gray-700 backdrop-blur-sm">
-                            <h2 className="text-2xl sm:text-3xl font-bold text-blue-300 text-center w-full">توماری ئاریشە</h2>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:gap-6">
-                            {/* Left side: Case info */}
-                            <div className="lg:col-span-4 bg-gray-800/50 p-6 border-b lg:border-b-0 lg:border-r border-gray-700">
-                                <h3 className="text-xl font-bold text-blue-400 mb-4 pb-2 border-b border-blue-500/30">پێزانینێن رویدانێ</h3>
-                                <div className="space-y-4 text-sm">
-                                    <DetailItem icon={<IconWrapper><BookmarkIcon /></IconWrapper>} label="جورێ ئاریشێ" value={incident.caseInfo.issueType} />
-                                    <DetailItem icon={<IconWrapper><UserIcon /></IconWrapper>} label="ناڤێ شوفێری" value={incident.caseInfo.driverName} />
-                                    <DetailItem icon={<IconWrapper><MapPinIcon /></IconWrapper>} label="جهێ ئاریشێ" value={incident.caseInfo.location} />
-                                    <DetailItem icon={<IconWrapper><HashtagIcon /></IconWrapper>} label="خالا" value={incident.caseInfo.point} />
-                                    <DetailItem icon={<IconWrapper><ClockIcon /></IconWrapper>} label="دەمژمێر" value={`${incident.caseInfo.timeFrom || '-'} - ${incident.caseInfo.timeTo || '-'} (${incident.caseInfo.period})`} />
-                                    <div className="bg-green-900/50 text-green-300 p-3 rounded-lg font-semibold flex items-start gap-3 mt-2">
-                                         <IconWrapper className="text-green-400"><BookmarkIcon /></IconWrapper>
-                                        <div><p className="text-green-200/80 text-xs">رەوانەكرن بـــو</p><p>{incident.caseInfo.sentTo}</p></div>
-                                    </div>
-                                </div>
-                            </div>
+                const creationDate = new Date(incident.date).toLocaleDateString('en-CA'); // YYYY-MM-DD
+                const creationTime = new Date(incident.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // HH:MM
 
-                            {/* Right side: Persons */}
-                            <div className="lg:col-span-8 p-6">
-                                 <h3 className="text-xl font-bold text-blue-400 mb-4 pb-2 border-b border-blue-500/30">کەسێن تێدا</h3>
+                return (
+                    <div ref={ref} className="w-[1000px] bg-[#0d1117] text-white font-sans rounded-xl overflow-hidden shadow-2xl border border-blue-900/50">
+                        <div className="p-4 border-b border-blue-800/60">
+                            <h2 className="text-3xl font-bold text-center text-blue-400">توماری ئاریشە</h2>
+                        </div>
+
+                        <div className="grid grid-cols-12 gap-4 p-4">
+                            <div className="col-span-8 p-4 bg-black/30 rounded-lg border border-gray-700">
+                                <h3 className="text-xl font-bold text-blue-400 mb-4 pb-2 border-b border-blue-500/30">کەسێن تێدا</h3>
                                 <div className="space-y-4">
                                     {incident.persons.map((person) => (
-                                        <div key={person.id} className="bg-gray-800/70 p-4 rounded-xl shadow-lg flex flex-col sm:flex-row gap-4 items-center sm:items-start relative overflow-hidden border border-gray-700">
-                                            <span className={`absolute top-0 right-0 px-4 py-1 text-xs font-bold text-white rounded-bl-lg ${person.type === 'تاوانبار' ? 'bg-red-600' : 'bg-green-600'}`}>{person.type}</span>
-                                            <div className="flex-shrink-0">
-                                                <div className="w-28 h-36 rounded-lg border-4 border-blue-500/30 shadow-lg flex items-center justify-center overflow-hidden bg-gray-700">
+                                        <div key={person.id} className="bg-slate-800/80 p-3 rounded-lg flex items-center gap-4 border border-gray-600/80">
+                                            <div className="relative flex-shrink-0">
+                                                <div className="w-32 h-40 bg-gray-700 rounded-md overflow-hidden border-2 border-blue-600/70 flex items-center justify-center">
                                                     {person.photo ? <img src={person.photo} alt={person.name} className="w-full h-full object-cover" /> : <CameraIcon className="w-12 h-12 text-gray-500" />}
                                                 </div>
+                                                <span className={`absolute top-0 right-0 px-3 py-1 text-sm font-bold text-white rounded-bl-lg ${person.type === 'تاوانبار' ? 'bg-red-600' : 'bg-green-600'}`}>{person.type}</span>
                                             </div>
-                                            <div className="flex-1 w-full text-sm space-y-2 pt-4 sm:pt-0">
-                                                <div className="flex items-center gap-3">
+                                            <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                                                <div className="col-span-2 flex items-center gap-3">
                                                     <IconWrapper><UserIcon /></IconWrapper>
                                                     <div>
-                                                        <p className="text-gray-400 text-xs">ناڤ</p>
-                                                        <p className="font-bold text-base text-white">{person.name}</p>
+                                                        <p className="text-xs text-gray-400">ناڤ</p>
+                                                        <p className="font-bold text-base">{person.name}</p>
                                                     </div>
                                                 </div>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 border-t border-gray-700/50">
-                                                    <DetailItem icon={<IconWrapper><CalendarIcon /></IconWrapper>} label="ژدایـــكبون" value={person.birthdate} />
-                                                    <DetailItem icon={<IconWrapper><PhoneIcon /></IconWrapper>} label="موبایل" value={person.phone} />
-                                                    <div className="md:col-span-2">
-                                                      <DetailItem icon={<IconWrapper><MapPinIcon /></IconWrapper>} label="ئاكنجی بوون" value={person.address} />
+                                                <div className="flex items-center gap-3">
+                                                    <IconWrapper><CalendarIcon /></IconWrapper>
+                                                    <div>
+                                                        <p className="text-xs text-gray-400">ژدایکبون</p>
+                                                        <p>{person.birthdate || '--'}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <IconWrapper><PhoneIcon /></IconWrapper>
+                                                    <div>
+                                                        <p className="text-xs text-gray-400">موبایل</p>
+                                                        <p>{person.phone || '--'}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="col-span-2 flex items-center gap-3">
+                                                    <IconWrapper><MapPinIcon /></IconWrapper>
+                                                    <div>
+                                                        <p className="text-xs text-gray-400">ئاكنجی بوون</p>
+                                                        <p>{person.address || '--'}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -640,15 +651,29 @@
                                     ))}
                                 </div>
                             </div>
+                             <div className="col-span-4 p-4 bg-black/30 rounded-lg border border-gray-700">
+                                <h3 className="text-xl font-bold text-blue-400 mb-4 pb-2 border-b border-blue-500/30">پێزانینێن رویدانێ</h3>
+                                <div className="space-y-3">
+                                    <DetailItem icon={<BookmarkIcon className="w-6 h-6"/>} label="جورێ ئاریشێ" value={incident.caseInfo.issueType} />
+                                    <DetailItem icon={<UserIcon className="w-6 h-6"/>} label="ناڤێ شوفێری" value={incident.caseInfo.driverName} />
+                                    <DetailItem icon={<MapPinIcon className="w-6 h-6"/>} label="جهێ ئاریشێ" value={incident.caseInfo.location} />
+                                    <DetailItem icon={<HashtagIcon className="w-6 h-6"/>} label="خالا" value={incident.caseInfo.point} />
+                                    <DetailItem icon={<ClockIcon className="w-6 h-6"/>} label="دەمژمێر" value={`${incident.caseInfo.timeFrom || '-'} - ${incident.caseInfo.timeTo || '-'} (${incident.caseInfo.period})`} />
+                                </div>
+                                <div className="mt-4 p-3 bg-green-800/50 rounded-lg border border-green-600/50">
+                                    <DetailItem icon={<BookmarkIcon className="w-6 h-6 text-green-400"/>} label="رەوانەكرن بـــو" value={incident.caseInfo.sentTo} />
+                                </div>
+                            </div>
                         </div>
                         
-                        <div className="bg-black/30 p-3 text-center text-xs text-gray-400 border-t border-gray-700 flex items-center justify-center gap-2 backdrop-blur-sm">
-                           <ClockIcon className="w-4 h-4" />
-                           <span>تم إنشاء هذه البطاقة في: {timestamp}</span>
+                        <div className="bg-black/40 p-2 text-center text-xs text-gray-400 border-t border-blue-800/60 flex items-center justify-center gap-2">
+                            <ClockIcon className="w-4 h-4" />
+                            <span>تم إنشاء هذه البطاقة في: {creationDate} م / {creationTime}</span>
                         </div>
                     </div>
                 );
             });
+
 
             const [incidents, setIncidents] = useLocalStorage('incidents', []);
             const [caseInfo, setCaseInfo] = useState(emptyCaseInfo);
@@ -661,7 +686,7 @@
 
             const handleDownload = useCallback((incident) => {
                 if (!cardRef.current) return;
-                window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 3 })
+                window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 3, backgroundColor: '#0d1117' })
                     .then((dataUrl) => {
                         const link = document.createElement('a');
                         link.download = `قضية-${incident.caseInfo.issueType.replace(/ /g, '_')}.png`;
@@ -675,7 +700,7 @@
               if (!cardRef.current) return;
               const fileName = `قضية-${incident.caseInfo.issueType.replace(/ /g, '_')}.png`;
               try {
-                const dataUrl = await window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 2 });
+                const dataUrl = await window.htmlToImage.toPng(cardRef.current, { quality: 1, pixelRatio: 2, backgroundColor: '#0d1117' });
                 const res = await fetch(dataUrl);
                 const blob = await res.blob();
                 const file = new File([blob], fileName, { type: 'image/png' });
@@ -746,7 +771,9 @@
                     {generatedIncident && (
                         <div className="bg-gray-800 p-6 rounded-lg shadow-xl flex flex-col items-center">
                             <h2 className="text-xl font-bold text-white mb-4">تم إنشاء بطاقة القضية بنجاح</h2>
-                            <IncidentCard ref={cardRef} incident={generatedIncident} />
+                            <div className="w-full overflow-x-auto py-2">
+                                <IncidentCard ref={cardRef} incident={generatedIncident} />
+                            </div>
                             <div className="mt-6 flex flex-wrap gap-4 justify-center">
                                 <Button onClick={() => setGeneratedIncident(null)} icon={<UserPlusIcon />} text="إضافة قضية جديدة" className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-800" />
                                 <Button onClick={() => handleShare(generatedIncident)} icon={<WhatsAppIcon className="w-5 h-5 text-white"/>} text="مشاركة" className="bg-green-600 hover:bg-green-700 focus:ring-green-800" />
