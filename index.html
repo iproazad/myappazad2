@@ -311,49 +311,6 @@
             </header>
           );
         };
-        
-        // --- From components/Modal.tsx ---
-        const Modal = ({ isOpen, onClose, children }) => {
-          useEffect(() => {
-            const handleEscape = (event) => {
-              if (event.key === 'Escape') {
-                onClose();
-              }
-            };
-            if (isOpen) {
-              document.addEventListener('keydown', handleEscape);
-            }
-            return () => {
-              document.removeEventListener('keydown', handleEscape);
-            };
-          }, [isOpen, onClose]);
-
-          if (!isOpen) return null;
-
-          return ReactDOM.createPortal(
-            <div 
-              className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4"
-              onClick={onClose}
-              role="dialog"
-              aria-modal="true"
-            >
-              <div 
-                className="bg-gray-900 rounded-xl shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-y-auto"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="p-4 sm:p-6 relative">
-                  <button onClick={onClose} className="absolute top-4 left-4 text-gray-400 hover:text-white transition-colors z-10">
-                    <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                  {children}
-                </div>
-              </div>
-            </div>,
-            document.body
-          );
-        };
 
         // --- From pages/SuspectPage.tsx ---
         const SuspectPage = () => {
@@ -428,8 +385,9 @@
 
             const [suspects, setSuspects] = useLocalStorage('suspects', []);
             const [formData, setFormData] = useState(emptySuspect);
-            const [modalSuspect, setModalSuspect] = useState(null);
+            const [generatedSuspect, setGeneratedSuspect] = useState(null);
             const cardRef = useRef(null);
+            const topRef = useRef(null);
             const [searchTerm, setSearchTerm] = useState('');
             const [sortBy, setSortBy] = useState('date-desc');
 
@@ -484,16 +442,21 @@
                 e.preventDefault();
                 const newSuspect = { id: Date.now().toString(), date: new Date().toISOString(), ...formData };
                 setSuspects(prev => [newSuspect, ...prev]);
-                setModalSuspect(newSuspect);
+                setGeneratedSuspect(newSuspect);
                 setFormData(emptySuspect);
                 const fileInput = document.getElementById('photo-upload');
                 if(fileInput) fileInput.value = "";
             };
 
             const handleSelectSuspect = (suspect) => {
-                setModalSuspect(suspect);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setGeneratedSuspect(suspect);
             };
+
+            useEffect(() => {
+                if (generatedSuspect) {
+                    topRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, [generatedSuspect]);
 
             const filteredAndSortedSuspects = useMemo(() => {
                 return suspects
@@ -509,19 +472,17 @@
             }, [suspects, searchTerm, sortBy]);
 
             return (
-                <div className="space-y-8">
-                    {modalSuspect && (
-                        <Modal isOpen={!!modalSuspect} onClose={() => setModalSuspect(null)}>
-                            <div className="bg-gray-900 p-4 rounded-lg flex flex-col items-center">
-                                <h2 className="text-xl font-bold text-white mb-4">تم إنشاء البطاقة بنجاح</h2>
-                                <SuspectCard ref={cardRef} suspect={modalSuspect} />
-                                <div className="mt-6 flex flex-wrap gap-4 justify-center">
-                                    <Button onClick={() => setModalSuspect(null)} icon={<UserPlusIcon />} text="إضافة متهم جديد" className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-800" />
-                                    <Button onClick={() => handleShare(modalSuspect)} icon={<WhatsAppIcon className="w-5 h-5 text-white"/>} text="مشاركة" className="bg-green-600 hover:bg-green-700 focus:ring-green-800" />
-                                    <Button onClick={() => handleDownload(modalSuspect)} icon={<DownloadIcon />} text="حفظ البطاقة" />
-                                </div>
+                <div className="space-y-8" ref={topRef}>
+                    {generatedSuspect && (
+                        <div className="bg-gray-800 p-6 rounded-lg shadow-xl flex flex-col items-center">
+                            <h2 className="text-xl font-bold text-white mb-4">تم إنشاء البطاقة بنجاح</h2>
+                            <SuspectCard ref={cardRef} suspect={generatedSuspect} />
+                            <div className="mt-6 flex flex-wrap gap-4 justify-center">
+                                <Button onClick={() => setGeneratedSuspect(null)} icon={<UserPlusIcon />} text="إضافة متهم جديد" className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-800" />
+                                <Button onClick={() => handleShare(generatedSuspect)} icon={<WhatsAppIcon className="w-5 h-5 text-white"/>} text="مشاركة" className="bg-green-600 hover:bg-green-700 focus:ring-green-800" />
+                                <Button onClick={() => handleDownload(generatedSuspect)} icon={<DownloadIcon />} text="حفظ البطاقة" />
                             </div>
-                        </Modal>
+                        </div>
                     )}
                     
                     <div className="bg-gray-800 p-6 rounded-lg shadow-xl">
@@ -692,8 +653,9 @@
             const [incidents, setIncidents] = useLocalStorage('incidents', []);
             const [caseInfo, setCaseInfo] = useState(emptyCaseInfo);
             const [persons, setPersons] = useState([]);
-            const [modalIncident, setModalIncident] = useState(null);
+            const [generatedIncident, setGeneratedIncident] = useState(null);
             const cardRef = useRef(null);
+            const topRef = useRef(null);
             const [searchTerm, setSearchTerm] = useState('');
             const [sortBy, setSortBy] = useState('date-desc');
 
@@ -751,15 +713,20 @@
                 if (persons.length === 0) return alert('يجب إضافة شخص واحد على الأقل.');
                 const newIncident = { id: Date.now().toString(), date: new Date().toISOString(), caseInfo, persons };
                 setIncidents(prev => [newIncident, ...prev]);
-                setModalIncident(newIncident);
+                setGeneratedIncident(newIncident);
                 setCaseInfo(emptyCaseInfo);
                 setPersons([]);
             };
 
             const handleSelectIncident = (incident) => {
-                setModalIncident(incident);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setGeneratedIncident(incident);
             };
+
+            useEffect(() => {
+                if (generatedIncident) {
+                    topRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, [generatedIncident]);
 
             const filteredAndSortedIncidents = useMemo(() => {
                 return incidents
@@ -775,19 +742,17 @@
             }, [incidents, searchTerm, sortBy]);
 
             return (
-                <div className="space-y-8">
-                    {modalIncident && (
-                        <Modal isOpen={!!modalIncident} onClose={() => setModalIncident(null)}>
-                            <div className="bg-gray-900 p-4 rounded-lg flex flex-col items-center">
-                                <h2 className="text-xl font-bold text-white mb-4">تم إنشاء بطاقة القضية بنجاح</h2>
-                                <IncidentCard ref={cardRef} incident={modalIncident} />
-                                <div className="mt-6 flex flex-wrap gap-4 justify-center">
-                                    <Button onClick={() => setModalIncident(null)} icon={<UserPlusIcon />} text="إضافة قضية جديدة" className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-800" />
-                                    <Button onClick={() => handleShare(modalIncident)} icon={<WhatsAppIcon className="w-5 h-5 text-white"/>} text="مشاركة" className="bg-green-600 hover:bg-green-700 focus:ring-green-800" />
-                                    <Button onClick={() => handleDownload(modalIncident)} icon={<DownloadIcon />} text="حفظ البطاقة" />
-                                </div>
+                <div className="space-y-8" ref={topRef}>
+                    {generatedIncident && (
+                        <div className="bg-gray-800 p-6 rounded-lg shadow-xl flex flex-col items-center">
+                            <h2 className="text-xl font-bold text-white mb-4">تم إنشاء بطاقة القضية بنجاح</h2>
+                            <IncidentCard ref={cardRef} incident={generatedIncident} />
+                            <div className="mt-6 flex flex-wrap gap-4 justify-center">
+                                <Button onClick={() => setGeneratedIncident(null)} icon={<UserPlusIcon />} text="إضافة قضية جديدة" className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-800" />
+                                <Button onClick={() => handleShare(generatedIncident)} icon={<WhatsAppIcon className="w-5 h-5 text-white"/>} text="مشاركة" className="bg-green-600 hover:bg-green-700 focus:ring-green-800" />
+                                <Button onClick={() => handleDownload(generatedIncident)} icon={<DownloadIcon />} text="حفظ البطاقة" />
                             </div>
-                        </Modal>
+                        </div>
                     )}
                     <div className="bg-gray-800 p-6 rounded-lg shadow-xl">
                         <h2 className="text-2xl font-bold mb-6 text-blue-400 border-b-2 border-blue-500 pb-2">تسجيل قضية جديدة</h2>
