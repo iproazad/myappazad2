@@ -122,6 +122,40 @@
       (() => {
         const { useState, useRef, useCallback, useEffect, useMemo, forwardRef, StrictMode } = React;
 
+        const compressImage = (dataUrl, quality = 0.7, maxWidth = 1024) => {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = dataUrl;
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+
+              if (!ctx) {
+                return reject(new Error('Could not get canvas context'));
+              }
+
+              let { width, height } = img;
+
+              if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+
+              ctx.drawImage(img, 0, 0, width, height);
+
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+              resolve(compressedDataUrl);
+            };
+            img.onerror = (error) => {
+              console.error("Image load error for compression", error);
+              reject(error);
+            };
+          });
+        };
+
         // --- From types.ts ---
         
         // --- From hooks/useLocalStorage.ts ---
@@ -150,15 +184,24 @@
             return getStorageValue(key, defaultValue);
           });
 
-          useEffect(() => {
+          const setValueAndStore = (newValue) => {
+            const valueToStore = newValue instanceof Function ? newValue(value) : newValue;
             try {
-              localStorage.setItem(key, JSON.stringify(value));
+              localStorage.setItem(key, JSON.stringify(valueToStore));
+              setValue(valueToStore);
+              return true; // Indicate success
             } catch (error) {
-               console.error("Error accessing localStorage", error);
+               console.error(`Error setting localStorage key "${key}":`, error);
+               if (error instanceof DOMException && (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED')) {
+                 alert('فشل الحفظ. مساحة التخزين ممتلئة. حاول حذف بعض السجلات القديمة لتوفير مساحة.');
+               } else {
+                 alert('حدث خطأ غير متوقع أثناء حفظ البيانات.');
+               }
+               return false; // Indicate failure
             }
-          }, [key, value]);
+          };
 
-          return [value, setValue];
+          return [value, setValueAndStore];
         };
 
         // --- From components/Icons.tsx ---
@@ -443,7 +486,19 @@
             const handlePhotoChange = (e) => {
                 if (e.target.files && e.target.files[0]) {
                     const reader = new FileReader();
-                    reader.onload = (event) => setFormData(prev => ({ ...prev, photo: event.target?.result }));
+                    reader.onload = (event) => {
+                        const originalDataUrl = event.target?.result;
+                        if (originalDataUrl) {
+                            compressImage(originalDataUrl)
+                                .then(compressedDataUrl => {
+                                    setFormData(prev => ({ ...prev, photo: compressedDataUrl }));
+                                })
+                                .catch(error => {
+                                    console.error("Failed to compress image", error);
+                                    setFormData(prev => ({ ...prev, photo: originalDataUrl }));
+                                });
+                        }
+                    };
                     reader.readAsDataURL(e.target.files[0]);
                 }
             };
@@ -451,11 +506,14 @@
             const handleSubmit = (e) => {
                 e.preventDefault();
                 const newSuspect = { id: Date.now().toString(), date: new Date().toISOString(), ...formData };
-                setSuspects(prev => [newSuspect, ...prev]);
-                setGeneratedSuspect(newSuspect);
-                setFormData(emptySuspect);
-                const fileInput = document.getElementById('photo-upload');
-                if(fileInput) fileInput.value = "";
+                const success = setSuspects(prev => [newSuspect, ...prev]);
+                
+                if (success) {
+                    setGeneratedSuspect(newSuspect);
+                    setFormData(emptySuspect);
+                    const fileInput = document.getElementById('photo-upload');
+                    if(fileInput) fileInput.value = "";
+                }
             };
 
             const handleSelectSuspect = (suspect) => {
@@ -726,7 +784,19 @@
             const handlePhotoChange = (index, e) => {
                 if (e.target.files && e.target.files[0]) {
                     const reader = new FileReader();
-                    reader.onload = (event) => handlePersonChange(index, 'photo', event.target?.result);
+                    reader.onload = (event) => {
+                        const originalDataUrl = event.target?.result;
+                        if (originalDataUrl) {
+                            compressImage(originalDataUrl)
+                                .then(compressedDataUrl => {
+                                    handlePersonChange(index, 'photo', compressedDataUrl);
+                                })
+                                .catch(error => {
+                                    console.error("Failed to compress image", error);
+                                    handlePersonChange(index, 'photo', originalDataUrl);
+                                });
+                        }
+                    };
                     reader.readAsDataURL(e.target.files[0]);
                 }
             };
@@ -737,10 +807,12 @@
                 e.preventDefault();
                 if (persons.length === 0) return alert('يجب إضافة شخص واحد على الأقل.');
                 const newIncident = { id: Date.now().toString(), date: new Date().toISOString(), caseInfo, persons };
-                setIncidents(prev => [newIncident, ...prev]);
-                setGeneratedIncident(newIncident);
-                setCaseInfo(emptyCaseInfo);
-                setPersons([]);
+                const success = setIncidents(prev => [newIncident, ...prev]);
+                if (success) {
+                    setGeneratedIncident(newIncident);
+                    setCaseInfo(emptyCaseInfo);
+                    setPersons([]);
+                }
             };
 
             const handleSelectIncident = (incident) => {
