@@ -270,6 +270,71 @@
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
         );
+        
+        const CameraCapture = ({ onCapture, onCancel }) => {
+          const videoRef = useRef(null);
+          const canvasRef = useRef(null);
+          const [stream, setStream] = useState(null);
+          const [error, setError] = useState(null);
+
+          useEffect(() => {
+            let active = true;
+            const openCamera = async () => {
+              try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                  video: { facingMode: 'user' },
+                });
+                if (active && videoRef.current) {
+                  videoRef.current.srcObject = stream;
+                  setStream(stream);
+                }
+              } catch (err) {
+                console.error("Error accessing camera: ", err);
+                setError("لا يمكن الوصول إلى الكاميرا. يرجى التحقق من الأذونات وتحديث الصفحة.");
+              }
+            };
+            openCamera();
+            return () => {
+              active = false;
+              if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+              }
+            };
+          }, []);
+
+          const handleCapture = () => {
+            if (videoRef.current && canvasRef.current && stream) {
+              const video = videoRef.current;
+              const canvas = canvasRef.current;
+              const context = canvas.getContext('2d');
+
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+              
+              const dataUrl = canvas.toDataURL('image/jpeg');
+              onCapture(dataUrl);
+            }
+          };
+
+          return (
+            <div className="fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="camera-modal-title">
+                <div className="bg-gray-800 p-4 rounded-lg shadow-xl relative w-full max-w-lg">
+                    <h2 id="camera-modal-title" className="text-xl font-bold text-white mb-4 text-center">التقاط صورة</h2>
+                    {error ? (
+                        <div className="text-red-400 text-center p-4">{error}</div>
+                    ) : (
+                        <video ref={videoRef} autoPlay playsInline className="w-full h-auto rounded-lg shadow-lg bg-black"></video>
+                    )}
+                    <canvas ref={canvasRef} className="hidden"></canvas>
+                    <div className="mt-4 flex gap-4 justify-center">
+                        <Button onClick={handleCapture} text="التقاط" icon={<CameraIcon className="w-5 h-5" />} disabled={!stream || !!error} />
+                        <Button onClick={onCancel} text="إلغاء" className="bg-red-600 hover:bg-red-700 focus:ring-red-800" />
+                    </div>
+                </div>
+            </div>
+          );
+        };
 
         // --- From components/Button.tsx ---
         const Button = ({ text, icon, className, ...props }) => {
@@ -541,6 +606,7 @@
             const [suspects, setSuspects] = useLocalStorage('suspects', []);
             const [formData, setFormData] = useState(emptySuspect);
             const [generatedSuspect, setGeneratedSuspect] = useState(null);
+            const [isCameraOpen, setIsCameraOpen] = useState(false);
             const cardRef = useRef(null);
             const topRef = useRef(null);
 
@@ -579,6 +645,20 @@
                 console.error('Error sharing card:', error);
                 alert('حدث خطأ أثناء محاولة مشاركة البطاقة.');
               }
+            };
+            
+            const handleCaptureComplete = (imageDataUrl) => {
+                if (imageDataUrl) {
+                    compressImage(imageDataUrl)
+                        .then(compressedDataUrl => {
+                            setFormData(prev => ({ ...prev, photo: compressedDataUrl }));
+                        })
+                        .catch(error => {
+                            console.error("Failed to compress image", error);
+                            setFormData(prev => ({ ...prev, photo: imageDataUrl }));
+                        });
+                }
+                setIsCameraOpen(false);
             };
 
             const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }));
@@ -624,6 +704,7 @@
 
             return (
                 <div className="space-y-8" ref={topRef}>
+                    {isCameraOpen && <CameraCapture onCapture={handleCaptureComplete} onCancel={() => setIsCameraOpen(false)} />}
                     {generatedSuspect && (
                         <div className="bg-gray-800 p-6 rounded-lg shadow-xl flex flex-col items-center">
                             <h2 className="text-xl font-bold text-white mb-4">تم إنشاء البطاقة بنجاح</h2>
@@ -645,10 +726,19 @@
                                 <div className="w-40 h-40 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden border-2 border-gray-500">
                                     {formData.photo ? <img src={formData.photo} alt="صورة المتهم" className="w-full h-full object-cover" /> : <CameraIcon className="w-16 h-16 text-gray-400" />}
                                 </div>
-                                <label htmlFor="photo-upload" className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                                    <input id="photo-upload" type="file" className="hidden" onChange={handlePhotoChange} accept="image/*" />
-                                    <span>{formData.photo ? "تغيير الصورة" : "التقاط أو تحميل صورة"}</span>
-                                </label>
+                                <div className="flex flex-wrap items-center justify-center gap-3">
+                                    <label htmlFor="photo-upload" className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                                        <input id="photo-upload" type="file" className="hidden" onChange={handlePhotoChange} accept="image/*" />
+                                        <span>{formData.photo ? "تغيير الصورة" : "تحميل صورة"}</span>
+                                    </label>
+                                     <Button
+                                        type="button"
+                                        onClick={() => setIsCameraOpen(true)}
+                                        text="التقاط بالكاميرا"
+                                        icon={<CameraIcon className="w-5 h-5"/>}
+                                        className="bg-green-600 hover:bg-green-700 focus:ring-green-800"
+                                    />
+                                </div>
                             </div>
                             <div className="border-t border-gray-700 pt-4">
                                 <h3 className="text-lg font-semibold text-gray-300 mb-4">زانیاری کەسی</h3>
@@ -708,6 +798,7 @@
             const [persons, setPersons] = useState([]);
             const [notes, setNotes] = useState('');
             const [generatedIncident, setGeneratedIncident] = useState(null);
+            const [cameraForPersonIndex, setCameraForPersonIndex] = useState(null);
             const cardRef = useRef(null);
             const topRef = useRef(null);
 
@@ -746,6 +837,20 @@
                 console.error('Error sharing card:', error);
                 alert('حدث خطأ أثناء محاولة مشاركة البطاقة.');
               }
+            };
+            
+            const handleCaptureComplete = (imageDataUrl) => {
+                if (imageDataUrl && cameraForPersonIndex !== null) {
+                    compressImage(imageDataUrl)
+                        .then(compressedDataUrl => {
+                            handlePersonChange(cameraForPersonIndex, 'photo', compressedDataUrl);
+                        })
+                        .catch(error => {
+                            console.error("Failed to compress image", error);
+                            handlePersonChange(cameraForPersonIndex, 'photo', imageDataUrl);
+                        });
+                }
+                setCameraForPersonIndex(null);
             };
 
             const handleCaseInfoChange = (e) => setCaseInfo(prev => ({ ...prev, [e.target.id]: e.target.value }));
@@ -793,6 +898,7 @@
 
             return (
                 <div className="space-y-8" ref={topRef}>
+                    {cameraForPersonIndex !== null && <CameraCapture onCapture={handleCaptureComplete} onCancel={() => setCameraForPersonIndex(null)} />}
                     {generatedIncident && (
                         <div className="bg-gray-800 p-6 rounded-lg shadow-xl flex flex-col items-center">
                             <h2 className="text-xl font-bold text-white mb-4">تم إنشاء بطاقة القضية بنجاح</h2>
@@ -819,10 +925,16 @@
                                                 <div className="w-32 h-32 bg-gray-600 rounded-full overflow-hidden flex items-center justify-center">
                                                     {person.photo ? <img src={person.photo} alt={person.name} className="w-full h-full object-cover" /> : <CameraIcon className="w-12 h-12 text-gray-400"/>}
                                                 </div>
-                                                <label className="text-sm text-blue-400 cursor-pointer">
-                                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoChange(index, e)} />
-                                                    {person.photo ? "تغيير الصورة" : "تحميل صورة"}
-                                                </label>
+                                                <div className="flex flex-wrap justify-center gap-2 mt-2">
+                                                    <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-1">
+                                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handlePhotoChange(index, e)} />
+                                                        <span>{person.photo ? "تغيير" : "تحميل"}</span>
+                                                    </label>
+                                                    <button type="button" onClick={() => setCameraForPersonIndex(index)} className="cursor-pointer bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm flex items-center gap-1">
+                                                        <CameraIcon className="w-4 h-4"/>
+                                                        <span>التقاط</span>
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <InputField id={`p-name-${index}`} label="ناڤێ تومەتباری" value={person.name} onChange={(e) => handlePersonChange(index, 'name', e.target.value)} required />
